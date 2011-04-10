@@ -67,9 +67,9 @@ Almost the same setup, except that you have to initialize HireFire yourself afte
 
 **(Again, the order is important: Delayed Job > HireFire)**
 
-If all goes well you should see a message similar to when you boot your application:
+If all goes well you should see a message similar to this when you boot your application:
 
-    [HireFire] Successfully hooked in to Delayed::Backend::ActiveRecord::Job!
+    [HireFire] Delayed::Backend::ActiveRecord::Job detected!
 
 
 Mapper Support
