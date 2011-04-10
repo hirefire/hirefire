@@ -37,7 +37,7 @@ module HireFire
       # @return [Heroku::Client] instance of the heroku client
       def client
         @client ||= ::Heroku::Client.new(
-          ENV['HEROKU_EMAIL'], ENV['HEROKU_PASSWORD']
+          ENV['HIREFIRE_EMAIL'], ENV['HIREFIRE_PASSWORD']
         )
       end
 
