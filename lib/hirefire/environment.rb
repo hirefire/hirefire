@@ -18,7 +18,7 @@ module HireFire
           :unless => Proc.new { |job| job.failed_at.nil? }
       end
 
-      Logger.message("Successfully hooked in to #{ base.name }!")
+      Logger.message("#{ base.name } detected!")
     end
 
     ##

@@ -53,7 +53,7 @@ module HireFire
         ratio.each do |ratio|
           if jobs_count >= ratio[:jobs] and max_workers >= ratio[:workers]
             if not workers_count == ratio[:workers]
-              Logger.message("Going to hire #{ ratio[:workers] } workers.")
+              Logger.message("Hiring more workers so we have #{ ratio[:workers] } in total.")
               workers(ratio[:workers])
             end
 
@@ -72,7 +72,7 @@ module HireFire
       # @return [nil]
       def fire
         if jobs == 0 and workers > 0
-          Logger.message("All pending jobs have been processed. All workers are being fired.")
+          Logger.message("All queued jobs have been processed. Firing all workers.")
           workers(0)
         end
       end
