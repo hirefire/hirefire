@@ -30,7 +30,13 @@ A painless process. In a Ruby on Rails environment you would do something like t
 
 **(The order is important: Delayed Job > HireFire)**
 
-That's it. Next time you deploy to [Heroku](http://heroku.com/) it'll automatically hire and fire your workers. Now, there are defaults, but I highly recommend you configure it since it only takes a few seconds. Create an initializer file:
+Be sure to add the following Heroku environment variables so HireFire can manage your workers.
+
+    heroku config:add HIREFIRE_EMAIL=<your_email> HIREFIRE_PASSWORD=<your_password>
+
+These are the same email and password credentials you use to log in to the Heroku web interface to manage your workers.
+
+And that's it. Next time you deploy to [Heroku](http://heroku.com/) it'll automatically hire and fire your workers. Now, there are defaults, but I highly recommend you configure it since it only takes a few seconds. Create an initializer file:
 
 **Rails.root/config/initializers/hirefire.rb**
 
