@@ -1,4 +1,4 @@
-Copyright (c) 2011 Michael van Rooijen
+Copyright (c) 2011 Michael van Rooijen ( [@meskyanichi](http://twitter.com/#!/meskyanichi) )
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
