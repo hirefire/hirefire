@@ -12,7 +12,7 @@ Gem::Specification.new do |gem|
   gem.authors     = 'Michael van Rooijen'
   gem.email       = 'meskyanichi@gmail.com'
   gem.homepage    = 'http://rubygems.org/gems/hirefire'
-  gem.summary     = 'HireFire automatically "hires" and "fires" (aka scales) Delayed Job workers on Heroku.'
+  gem.summary     = 'HireFire automatically "hires" and "fires" (aka "scales") Delayed Job workers on Heroku.'
   gem.description = <<-EOS
                       HireFire automatically "hires" and "fires" (aka "scales") Delayed Job workers on Heroku.
                       When there are no queue jobs, HireFire will fire (shut down) all workers. If there are
