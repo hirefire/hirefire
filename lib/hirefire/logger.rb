@@ -39,8 +39,6 @@ module HireFire
       puts string
     end
 
-    # private
-
     ##
     # Builds the string in a log format with the date/time, the type (colorized)
     # based on whether it's a message, notice or error, and the message itself.
