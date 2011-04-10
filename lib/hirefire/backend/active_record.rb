@@ -10,8 +10,9 @@ module HireFire
       #
       # @return [Fixnum]
       def jobs
-        Delayed::Job.where(:failed_at => nil).
-        and('run_at >= ?', Time.now).count
+        Delayed::Job.
+        where(:failed_at => nil).
+        where('run_at <= ?', Time.now).count
       end
 
     end
