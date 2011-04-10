@@ -1,0 +1,11 @@
+# encoding: utf-8
+
+##
+# Run all tests when a file gets saved inside the lib folder
+infinity_test do
+  heuristics do
+    add('lib/') do |file|
+      run :all => :tests
+    end
+  end
+end
