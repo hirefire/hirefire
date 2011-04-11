@@ -64,37 +64,34 @@ module HireFire
         to_hire = false
         
         ratio.each do |ratio|
-          begin
+          if ratio[:when].respond_to? :call
             # If the function is true (EG: jobs_count (25) < 35) and you only 
             # have one worker (workers_count (1) < workers ratio (2)), increase
             # the number of workers available.
             if ratio[:when].call(jobs_count) and workers_count < ratio[:workers] and max_workers >= ratio[:workers]
-              to_hire = ratio[:workers]
+              log_and_hire(ratio[:workers])
+              
+              break
             end
-          rescue NoMethodError
+            
+          else
+            # Standard integer (non-functional format)
             if jobs_count >= ratio[:jobs] and max_workers >= ratio[:workers]
               if not workers_count == ratio[:workers]
-                to_hire = ratio[:workers]
+                log_and_hire(ratio[:workers])
               end
+              
+              break
             end
-          end
-          
-          if to_hire
-            Logger.message("Hiring more workers so we have #{ ratio[:workers] } in total.")
-            workers(to_hire)
             
-            return
           end
         end
         
-        begin
-          # Finally, given a functional style ratio list and none have matched,
-          # it must be assumed that there is a massive queue of jobs and 
-          # max_workers is necessary.
-          if ratio.last[:when].call(jobs_count) === false
-            workers(max_workers)
-          end
-        rescue NoMethodError; end
+        # Finally, given a functional style ratio list and none have matched,
+        # assume that there is a massive queue of jobs and max_workers is necessary.
+        if ratio[:when].respond_to? :call and ratio.last[:when].call(jobs_count) === false
+          workers(max_workers)
+        end
       end
 
       ##
@@ -113,7 +110,16 @@ module HireFire
       end
 
       private
-
+      
+      ##
+      # Helper method for hire that logs the hiring of more workers, then hires those workers.
+      #
+      # @return [nil]
+      def log_and_hire(some_workers)
+        Logger.message("Hiring more workers so we have #{ ratio[:workers] } in total.")
+        workers(some_workers)
+      end
+      
       ##
       # Wrapper method for HireFire.configuration
       # Returns the max amount of workers that may run concurrently
