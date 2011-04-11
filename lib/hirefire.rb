@@ -5,18 +5,19 @@ module HireFire
   ##
   # HireFire constants
   LIB_PATH         = File.dirname(__FILE__)
-  FREELANCER_PATH  = File.join(LIB_PATH,        'hirefire')
-  ENVIRONMENT_PATH = File.join(FREELANCER_PATH, 'environment')
-  BACKEND_PATH     = File.join(FREELANCER_PATH, 'backend')
+  HIREFIRE_PATH    = File.join(LIB_PATH,      'hirefire')
+  ENVIRONMENT_PATH = File.join(HIREFIRE_PATH, 'environment')
+  BACKEND_PATH     = File.join(HIREFIRE_PATH, 'backend')
+  WORKERS_PATH     = File.join(HIREFIRE_PATH, 'workers')
 
   ##
   # HireFire namespace
-  autoload :Configuration, File.join(FREELANCER_PATH, 'configuration')
-  autoload :Environment,   File.join(FREELANCER_PATH, 'environment')
-  autoload :Initializer,   File.join(FREELANCER_PATH, 'initializer')
-  autoload :Backend,       File.join(FREELANCER_PATH, 'backend')
-  autoload :Logger,        File.join(FREELANCER_PATH, 'logger')
-  autoload :Version,       File.join(FREELANCER_PATH, 'version')
+  autoload :Configuration, File.join(HIREFIRE_PATH, 'configuration')
+  autoload :Environment,   File.join(HIREFIRE_PATH, 'environment')
+  autoload :Initializer,   File.join(HIREFIRE_PATH, 'initializer')
+  autoload :Backend,       File.join(HIREFIRE_PATH, 'backend')
+  autoload :Logger,        File.join(HIREFIRE_PATH, 'logger')
+  autoload :Version,       File.join(HIREFIRE_PATH, 'version')
 
   ##
   # HireFire::Environment namespace
@@ -28,10 +29,30 @@ module HireFire
   end
 
   ##
+  # HireFire::Workers namespace
+  module Workers
+    autoload :DelayedJob, File.join(WORKERS_PATH, 'delayed_job')
+    autoload :Resque,     File.join(WORKERS_PATH, 'resque')
+  end
+
+  ##
   # HireFire::Backend namespace
   module Backend
-    autoload :ActiveRecord, File.join(BACKEND_PATH, 'active_record')
-    autoload :Mongoid,      File.join(BACKEND_PATH, 'mongoid')
+    DELAYED_JOB_PATH = File.join(BACKEND_PATH, 'delayed_job')
+    RESQUE_PATH      = File.join(BACKEND_PATH, 'resque')
+
+    ##
+    # HireFire::Backend::DelayedJob namespace
+    module DelayedJob
+      autoload :ActiveRecord, File.join(DELAYED_JOB_PATH, 'active_record')
+      autoload :Mongoid,      File.join(DELAYED_JOB_PATH, 'mongoid')
+    end
+
+    ##
+    # HireFire::Backend::Resque namespace
+    module Resque
+      autoload :Redis, File.join(RESQUE_PATH, 'redis')
+    end
   end
 
   ##
@@ -79,7 +100,8 @@ end
 # so that the developer doesn't have to manually invoke it from an initializer file
 #
 # Users not using Ruby on Rails will have to run "HireFire::Initializer.initialize!"
-# in their application manually, after loading Delayed Job and the desired mapper (ActiveRecord or Mongoid)
+# in their application manually, after loading the worker library (either "Delayed Job" or "Resque")
+# and the desired mapper (ActiveRecord, Mongoid or Redis)
 if defined?(Rails)
-  require File.join(HireFire::FREELANCER_PATH, 'railtie')
+  require File.join(HireFire::HIREFIRE_PATH, 'railtie')
 end

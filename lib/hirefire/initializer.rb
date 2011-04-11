@@ -4,33 +4,69 @@ module HireFire
   class Initializer
 
     ##
-    # Loads the HireFire extension in to Delayed Job and
-    # extends the Delayed Job "jobs:work" rake task command
+    # Loads the HireFire extension in to the loaded worker library and
+    # extends that library by injecting HireFire hooks in the proper locations.
+    #
+    # Currently it supports:
+    #  - Delayed Job
+    #    - ActiveRecord ORM
+    #    - Mongoid ODM
+    #  - Resque
+    #    - Redis
+    #
+    # @note
+    #   Either the Delayed Job, or the Resque worker library must be
+    #   loaded BEFORE HireFire initializes, otherwise it'll be unable
+    #   to detect the proper library and it will not work.
     #
     # @return [nil]
     def self.initialize!
+
       ##
-      # If DelayedJob is using ActiveRecord, then include
-      # HireFire::Environment in to the ActiveRecord Delayed Job Backend
-      if defined?(Delayed::Backend::ActiveRecord::Job)
-        Delayed::Backend::ActiveRecord::Job.
-        send(:include, HireFire::Environment).
-        send(:include, HireFire::Backend)
+      # Initialize Delayed::Job extensions if Delayed::Job is found
+      if defined?(Delayed::Job)
+        ##
+        # If DelayedJob is using ActiveRecord, then include
+        # HireFire::Environment in to the ActiveRecord Delayed Job Backend
+        if defined?(Delayed::Backend::ActiveRecord::Job)
+          Delayed::Backend::ActiveRecord::Job.
+          send(:include, HireFire::Environment).
+          send(:include, HireFire::Backend)
+        end
+
+        ##
+        # If DelayedJob is using Mongoid, then include
+        # HireFire::Environment in to the Mongoid Delayed Job Backend
+        if defined?(Delayed::Backend::Mongoid::Job)
+          Delayed::Backend::Mongoid::Job.
+          send(:include, HireFire::Environment).
+          send(:include, HireFire::Backend)
+        end
+
+        ##
+        # Load Delayed Job extensions, this will patch Delayed::Worker
+        # to implement the necessary hooks to invoke HireFire from
+        require File.join(HireFire::WORKERS_PATH, 'delayed_job')
       end
 
       ##
-      # If DelayedJob is using Mongoid, then include
-      # HireFire::Environment in to the Mongoid Delayed Job Backend
-      if defined?(Delayed::Backend::Mongoid::Job)
-        Delayed::Backend::Mongoid::Job.
-        send(:include, HireFire::Environment).
-        send(:include, HireFire::Backend)
-      end
+      # Initialize Resque extensions if Resque is found
+      if defined?(::Resque)
 
-      ##
-      # Load Delayed Job extension, this is the start
-      # method that gets invoked when running "rake jobs:work"
-      require File.dirname(__FILE__) + '/delayed_job_extension'
+        ##
+        # Include the HireFire::Environment which will add an instance
+        # of HireFire::Environment::(Heroku|Local|Noop) to the Resque::Job.environment class method
+        #
+        # Extend the Resque::Job class with the Resque::Job.jobs class method
+        ::Resque::Job.
+        send(:include, HireFire::Environment).
+        send(:extend, HireFire::Backend::Resque::Redis)
+
+        ##
+        # Load Resque extensions, this will patch Resque, Resque::Job and Resque::Worker
+        # to implement the necessary hooks to invoke HireFire from
+        require File.join(HireFire::WORKERS_PATH, 'resque')
+      end
     end
 
   end
