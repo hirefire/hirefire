@@ -31,7 +31,19 @@ module HireFire
       #   # It'll match at { :jobs => 35, :workers => 3 }, (35 jobs or more: hire 3 workers)
       #   # meaning that it'll ensure there are 3 workers running.
       #
-      #   # If there were already were 3 workers, it'll leave it as is
+      #   # If there were already were 3 workers, it'll leave it as is.
+      #   
+      #   # Alternatively, you can use a more functional syntax, which works in the same way.
+      #   
+      #   HireFire.configure do |config|
+      #     config.max_workers = 5
+      #     config.job_worker_ratio = [
+      #       { :when => lambda {|jobs| jobs < 15 }, :workers => 1 },
+      #       { :when => lambda {|jobs| jobs < 35 }, :workers => 2 },
+      #       { :when => lambda {|jobs| jobs < 60 }, :workers => 3 },
+      #       { :when => lambda {|jobs| jobs < 80 }, :workers => 4 }
+      #     ]
+      #   end
       #   
       #   # If there were more than 3 workers running (say, 4 or 5), it will NOT reduce
       #   # the number. This is because when you reduce the number of workers, you cannot
@@ -49,17 +61,40 @@ module HireFire
       def hire
         jobs_count    = jobs
         workers_count = workers
-
+        to_hire = false
+        
         ratio.each do |ratio|
-          if jobs_count >= ratio[:jobs] and max_workers >= ratio[:workers]
-            if not workers_count == ratio[:workers]
-              Logger.message("Hiring more workers so we have #{ ratio[:workers] } in total.")
-              workers(ratio[:workers])
+          begin
+            # If the function is true (EG: jobs_count (25) < 35) and you only 
+            # have one worker (workers_count (1) < workers ratio (2)), increase
+            # the number of workers available.
+            if ratio[:when].call(jobs_count) and workers_count < ratio[:workers] and max_workers >= ratio[:workers]
+              to_hire = ratio[:workers]
             end
-
-            break
+          rescue NoMethodError
+            if jobs_count >= ratio[:jobs] and max_workers >= ratio[:workers]
+              if not workers_count == ratio[:workers]
+                to_hire = ratio[:workers]
+              end
+            end
+          end
+          
+          if to_hire
+            Logger.message("Hiring more workers so we have #{ ratio[:workers] } in total.")
+            workers(to_hire)
+            
+            return
           end
         end
+        
+        begin
+          # Finally, given a functional style ratio list and none have matched,
+          # it must be assumed that there is a massive queue of jobs and 
+          # max_workers is necessary.
+          if ratio.last[:when].call(jobs_count) === false
+            workers(max_workers)
+          end
+        rescue NoMethodError; end
       end
 
       ##

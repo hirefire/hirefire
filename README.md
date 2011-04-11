@@ -61,6 +61,18 @@ Basically what it comes down to is that we say **NEVER** to hire more than 5 wor
 
 Once all the jobs in the queue have been processed, it'll fire (shut down) all the workers and start with a single worker the next time a new job gets queued. And then the next time the queue hits 15 jobs mark, in which case the single worker isn't fast enough on it's own, it'll spin up the 2nd worker again.
 
+An alternative, functional approach is available for defining the job/worker ratios in the configuration file:
+
+    HireFire.configure do |config|
+      config.max_workers = 5
+      config.job_worker_ratio = [
+        { :when => lambda {|jobs| jobs < 15 }, :workers => 1 },
+        { :when => lambda {|jobs| jobs < 35 }, :workers => 2 },
+        { :when => lambda {|jobs| jobs < 60 }, :workers => 3 },
+        { :when => lambda {|jobs| jobs < 80 }, :workers => 4 }
+      ]
+    end
+
 
 In a non-Ruby on Rails environment
 ----------------------------------
