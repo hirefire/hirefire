@@ -103,78 +103,173 @@ describe HireFire::Environment::Base do
   end
 
   describe '#hire' do
-    before do
-      base.stubs(:max_workers).returns(5)
-      base.stubs(:ratio).returns([
-        { :jobs => 1,  :workers => 1 },
-        { :jobs => 15, :workers => 2 },
-        { :jobs => 30, :workers => 3 },
-        { :jobs => 60, :workers => 4 },
-        { :jobs => 90, :workers => 5 }
-      ].reverse)
+    describe 'the standard notation' do
+      before do
+        base.stubs(:max_workers).returns(5)
+        base.stubs(:ratio).returns([
+          { :jobs => 1,  :workers => 1 },
+          { :jobs => 15, :workers => 2 },
+          { :jobs => 30, :workers => 3 },
+          { :jobs => 60, :workers => 4 },
+          { :jobs => 90, :workers => 5 }
+        ])
+      end
+
+      it 'should request 1 worker' do
+        base.jobs    = 1
+        base.workers = 0
+
+        HireFire::Logger.expects(:message).with('Hiring more workers so we have 1 in total.')
+        base.expects(:workers).with(1).once
+        base.hire
+      end
+
+      it 'should not request 1 worker, since there already is one worker running' do
+        base.jobs    = 5
+        base.workers = 1
+
+        base.expects(:workers).with(1).never
+        base.hire
+      end
+
+      it 'should request 2 workers' do
+        base.jobs    = 15
+        base.workers = 0
+
+        HireFire::Logger.expects(:message).with('Hiring more workers so we have 2 in total.')
+        base.expects(:workers).with(2).once
+        base.hire
+      end
+
+      it 'should request 2 workers' do
+        base.jobs    = 20
+        base.workers = 1
+
+        HireFire::Logger.expects(:message).with('Hiring more workers so we have 2 in total.')
+        base.expects(:workers).with(2).once
+        base.hire
+      end
+
+      it 'should not request 2 workers since we already have 2' do
+        base.jobs    = 25
+        base.workers = 2
+
+        base.expects(:workers).with(2).never
+        base.hire
+      end
+
+      it 'should NEVER lower the worker amount from the #hire method' do
+        base.jobs    = 25 # simulate that 5 jobs are already processed (30 - 5)
+        base.workers = 3  # and 3 workers are hired
+
+        HireFire::Logger.expects(:message).with('Hiring more workers so we have 2 in total.').never
+        base.expects(:workers).with(2).never
+        base.hire
+      end
+
+      it 'should NEVER hire more workers than the #max_workers' do
+        base.jobs    = 100
+        base.workers = 0
+
+        base.stubs(:max_workers).returns(3) # set the max_workers = 3
+
+        HireFire::Logger.expects(:message).with('Hiring more workers so we have 3 in total.').once
+        base.expects(:workers).with(3).once
+        base.hire
+      end
+
+      it 'should NEVER do API requests to Heroku if the max_workers are already running' do
+        base.jobs    = 100
+        base.workers = 5
+
+        HireFire::Logger.expects(:message).with('Hiring more workers so we have 5 in total.').never
+        base.expects(:workers).with(5).never
+        base.hire
+      end
     end
 
-    it 'should request 1 worker' do
-      base.jobs    = 1
-      base.workers = 0
+    describe 'the Lambda (functional) notation' do
+      before do
+        base.stubs(:max_workers).returns(5)
+        base.stubs(:ratio).returns([
+          { :when => lambda {|jobs| jobs < 15 }, :workers => 1 },
+          { :when => lambda {|jobs| jobs < 30 }, :workers => 2 },
+          { :when => lambda {|jobs| jobs < 60 }, :workers => 3 },
+          { :when => lambda {|jobs| jobs < 90 }, :workers => 4 }
+        ])
+      end
 
-      HireFire::Logger.expects(:message).with('Hiring more workers so we have 1 in total.')
-      base.expects(:workers).with(1).once
-      base.hire
-    end
+      it 'should request 1 worker' do
+        base.jobs    = 1
+        base.workers = 0
 
-    it 'should not request 1 worker, since there already is one worker running' do
-      base.jobs    = 5
-      base.workers = 1
+        HireFire::Logger.expects(:message).with('Hiring more workers so we have 1 in total.')
+        base.expects(:workers).with(1).once
+        base.hire
+      end
 
-      base.expects(:workers).with(1).never
-      base.hire
-    end
+      it 'should not request 1 worker, since there already is one worker running' do
+        base.jobs    = 5
+        base.workers = 1
 
-    it 'should request 2 workers' do
-      base.jobs    = 15
-      base.workers = 0
+        base.expects(:workers).with(1).never
+        base.hire
+      end
 
-      HireFire::Logger.expects(:message).with('Hiring more workers so we have 2 in total.')
-      base.expects(:workers).with(2).once
-      base.hire
-    end
+      it 'should request 2 workers' do
+        base.jobs    = 15
+        base.workers = 0
 
-    it 'should request 2 workers' do
-      base.jobs    = 20
-      base.workers = 1
+        HireFire::Logger.expects(:message).with('Hiring more workers so we have 2 in total.')
+        base.expects(:workers).with(2).once
+        base.hire
+      end
 
-      HireFire::Logger.expects(:message).with('Hiring more workers so we have 2 in total.')
-      base.expects(:workers).with(2).once
-      base.hire
-    end
+      it 'should request 2 workers' do
+        base.jobs    = 20
+        base.workers = 1
 
-    it 'should not request 2 workers since we already have 2' do
-      base.jobs    = 25
-      base.workers = 2
+        HireFire::Logger.expects(:message).with('Hiring more workers so we have 2 in total.')
+        base.expects(:workers).with(2).once
+        base.hire
+      end
 
-      base.expects(:workers).with(2).never
-      base.hire
-    end
+      it 'should not request 2 workers since we already have 2' do
+        base.jobs    = 25
+        base.workers = 2
 
-    it 'should NEVER lower the worker amount from the #hire method' do
-      base.jobs    = 25 # simulate that 5 jobs are already processed (30 - 5)
-      base.workers = 3  # and 3 workers are hired
+        base.expects(:workers).with(2).never
+        base.hire
+      end
 
-      HireFire::Logger.expects(:message).with('Hiring more workers so we have 2 in total.').never
-      base.expects(:workers).with(2).never
-      base.hire
-    end
+      it 'should NEVER lower the worker amount from the #hire method' do
+        base.jobs    = 25 # simulate that 5 jobs are already processed (30 - 5)
+        base.workers = 3  # and 3 workers are hired
 
-    it 'should NEVER higher more workers than the #max_workers' do
-      base.jobs    = 100
-      base.workers = 0
+        HireFire::Logger.expects(:message).with('Hiring more workers so we have 2 in total.').never
+        base.expects(:workers).with(2).never
+        base.hire
+      end
 
-      base.stubs(:max_workers).returns(3) # set the max_workers = 5
+      it 'should NEVER hire more workers than the #max_workers' do
+        base.jobs    = 100
+        base.workers = 0
 
-      HireFire::Logger.expects(:message).with('Hiring more workers so we have 3 in total.').once
-      base.expects(:workers).with(3).once
-      base.hire
+        base.stubs(:max_workers).returns(3) # set the max_workers = 3
+
+        HireFire::Logger.expects(:message).with('Hiring more workers so we have 3 in total.').once
+        base.expects(:workers).with(3).once
+        base.hire
+      end
+
+      it 'should NEVER do API requests to Heroku if the max_workers are already running' do
+        base.jobs    = 100
+        base.workers = 5
+
+        HireFire::Logger.expects(:message).with('Hiring more workers so we have 5 in total.').never
+        base.expects(:workers).with(5).never
+        base.hire
+      end
     end
   end
 end

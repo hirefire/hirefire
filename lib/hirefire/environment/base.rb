@@ -31,7 +31,19 @@ module HireFire
       #   # It'll match at { :jobs => 35, :workers => 3 }, (35 jobs or more: hire 3 workers)
       #   # meaning that it'll ensure there are 3 workers running.
       #
-      #   # If there were already were 3 workers, it'll leave it as is
+      #   # If there were already were 3 workers, it'll leave it as is.
+      #
+      #   # Alternatively, you can use a more functional syntax, which works in the same way.
+      #
+      #   HireFire.configure do |config|
+      #     config.max_workers = 5
+      #     config.job_worker_ratio = [
+      #       { :when => lambda {|jobs| jobs < 15 }, :workers => 1 },
+      #       { :when => lambda {|jobs| jobs < 35 }, :workers => 2 },
+      #       { :when => lambda {|jobs| jobs < 60 }, :workers => 3 },
+      #       { :when => lambda {|jobs| jobs < 80 }, :workers => 4 }
+      #     ]
+      #   end
       #
       #   # If there were more than 3 workers running (say, 4 or 5), it will NOT reduce
       #   # the number. This is because when you reduce the number of workers, you cannot
@@ -50,15 +62,84 @@ module HireFire
         jobs_count    = jobs
         workers_count = workers
 
-        ratio.each do |ratio|
-          if jobs_count >= ratio[:jobs] and max_workers >= ratio[:workers]
-            if workers_count < ratio[:workers]
-              Logger.message("Hiring more workers so we have #{ ratio[:workers] } in total.")
-              workers(ratio[:workers])
-            end
+        ##
+        # Use "Standard Notation"
+        if not ratio.first[:when].respond_to? :call
 
-            break
+          ##
+          # Since the "Standard Notation" is defined in the in an ascending order
+          # in the array of hashes, we need to reverse this order in order to properly
+          # loop through and break out of the array at the correctly matched ratio
+          ratio.reverse!
+
+          ##
+          # Iterates through all the defined job/worker ratio's
+          # until it finds a match. Then it hires (if necessary) the appropriate
+          # amount of workers and breaks out of the loop
+          ratio.each do |ratio|
+
+            ##
+            # Standard notation
+            # This is the code for the default notation
+            #
+            # @example
+            #   { :jobs => 35,  :workers => 3 }
+            #
+            if jobs_count >= ratio[:jobs] and max_workers >= ratio[:workers]
+              if workers_count < ratio[:workers]
+                log_and_hire(ratio[:workers])
+              end
+
+              break
+            end
           end
+        end
+
+        ##
+        # Use "Functional (Lambda) Notation"
+        if ratio.first[:when].respond_to? :call
+
+          ##
+          # Iterates through all the defined job/worker ratio's
+          # until it finds a match. Then it hires (if necessary) the appropriate
+          # amount of workers and breaks out of the loop
+          ratio.each do |ratio|
+
+            ##
+            # Functional (Lambda) Notation
+            # This is the code for the Lambda notation, more verbose,
+            # but more humanly understandable
+            #
+            # @example
+            #   { :when => lambda {|jobs| jobs < 60 }, :workers => 3 }
+            #
+            if ratio[:when].call(jobs_count) and max_workers >= ratio[:workers]
+              if workers_count < ratio[:workers]
+                log_and_hire(ratio[:workers])
+              end
+
+              break
+            end
+          end
+        end
+
+        ##
+        # Applies only to the Functional (Lambda) Notation
+        # If the amount of queued jobs exceeds that of which was defined in the
+        # job/worker ratio array, it will hire the maximum amount of workers
+        #
+        # "if statements":
+        #   1. true if we use the Functional (Lambda) Notation
+        #   2. true if the last ratio (highest job/worker ratio) was exceeded
+        #   3. true if the max amount of workers are not yet running
+        #
+        # If all the the above statements are true, HireFire will hire the maximum
+        # amount of workers that were specified in the configuration
+        #
+        if ratio.last[:when].respond_to? :call \
+        and ratio.last[:when].call(jobs_count) === false \
+        and max_workers != workers_count
+          log_and_hire(max_workers)
         end
       end
 
@@ -80,6 +161,15 @@ module HireFire
       private
 
       ##
+      # Helper method for hire that logs the hiring of more workers, then hires those workers.
+      #
+      # @return [nil]
+      def log_and_hire(amount)
+        Logger.message("Hiring more workers so we have #{ amount } in total.")
+        workers(amount)
+      end
+
+      ##
       # Wrapper method for HireFire.configuration
       # Returns the max amount of workers that may run concurrently
       #
@@ -92,9 +182,9 @@ module HireFire
       # Wrapper method for HireFire.configuration
       # Returns the job/worker ratio array (in reversed order)
       #
-      # @return [Array] the array of hashes containing the job/worker ratio (in reversed order)
+      # @return [Array] the array of hashes containing the job/worker ratio
       def ratio
-        HireFire.configuration.job_worker_ratio.reverse
+        HireFire.configuration.job_worker_ratio
       end
 
     end
