@@ -15,5 +15,20 @@ module HireFire
       HireFire::Initializer.initialize!
     end
 
+    ##
+    # Adds additional rake tasks to the Ruby on Rails environment
+    #
+    # @note
+    #   In order for Resque to run on Heroku, it must have the 'rake jobs:work'
+    #   rake task since that's what Heroku uses to start workers. When using
+    #   Ruby on Rails automatically add the necessary default rake task for the user
+    #
+    # @note
+    #   Delayed Job already has 'rake jobs:work' built in.
+    #
+    rake_tasks do
+      require File.join(WORKERS_PATH, 'resque', 'tasks')
+    end
+
   end
 end
