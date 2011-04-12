@@ -1,7 +1,7 @@
 HireFire - The Heroku Worker Manager
 ====================================
 
-**HireFire automatically "hires" and "fires" (aka "scales") Delayed Job workers on Heroku**. When there are no queue jobs, HireFire will fire (shut down) all workers. If there are queued jobs, then it'll hire (spin up) workers. The amount of workers that get hired depends on the amount of queued jobs (the ratio can be configured by you). HireFire is great for both high, mid and low traffic applications. It can save you a lot of money by only hiring workers when there are pending jobs, and then firing them again once all the jobs have been processed. It's also capable to dramatically reducing processing time by automatically hiring more workers when the queue size increases.
+**HireFire automatically "hires" and "fires" (aka "scales") Delayed Job **(and soon Resque too!)** workers on Heroku**. When there are no queue jobs, HireFire will fire (shut down) all workers. If there are queued jobs, then it'll hire (spin up) workers. The amount of workers that get hired depends on the amount of queued jobs (the ratio can be configured by you). HireFire is great for both high, mid and low traffic applications. It can save you a lot of money by only hiring workers when there are pending jobs, and then firing them again once all the jobs have been processed. It's also capable to dramatically reducing processing time by automatically hiring more workers when the queue size increases.
 
 **Low traffic example** say we have a small application that doesn't process for more than 2 hours in the background a month. Meanwhile, your worker is basically just idle the rest of the 718 hours in that month. Keeping that idle worker running costs $36/month ($0.05/hour). But, for the resources you're actually **making use of** (2 hours a month), you should be paying $0.10/month, not $36/month. This is what HireFire is for.
 
@@ -89,7 +89,8 @@ Worker Support
 --------------
 
 Currently only [Delayed Job](https://github.com/collectiveidea/delayed_job) with either [ActiveRecord ORM](https://github.com/rails/rails/tree/master/activerecord) and [Mongoid ODM](https://github.com/mongoid/mongoid).
-Might have plans to implement this for other workers in the future.
+
+**UPDATE** [Resque](https://github.com/defunkt/resque) support will be added today or tomorrow! Have a working prototype already.
 
 
 Other potentially interesting gems
