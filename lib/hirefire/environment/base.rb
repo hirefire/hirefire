@@ -52,7 +52,7 @@ module HireFire
 
         ratio.each do |ratio|
           if jobs_count >= ratio[:jobs] and max_workers >= ratio[:workers]
-            if not workers_count == ratio[:workers]
+            if workers_count < ratio[:workers]
               Logger.message("Hiring more workers so we have #{ ratio[:workers] } in total.")
               workers(ratio[:workers])
             end

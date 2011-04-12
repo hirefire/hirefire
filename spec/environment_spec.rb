@@ -1,0 +1,180 @@
+# encoding: utf-8
+
+require File.expand_path('../spec_helper', __FILE__)
+
+module HireFire
+  module Backend
+    ##
+    # Stub out backend interface inclusion
+    # since it's irrelevant for these tests
+    def self.included(base)
+      base.send(:include, Environment::Stub)
+    end
+  end
+
+  module Environment
+    module Stub
+      ##
+      # Stubbed out since this normally comes from
+      # a sub class like HireFire::Environment::Heroku or
+      # HireFire::Environment::Local
+      def workers(amount = nil)
+        if amount.nil?
+          @_workers ||= 0
+          return @_workers
+        end
+      end
+
+      ##
+      # Allows the specs to stub the workers count
+      # and return the desired amount
+      def workers=(amount)
+        @_workers = amount
+        self.stubs(:workers).with.returns(amount)
+      end
+
+      ##
+      # Returns the amount of jobs
+      # Defaults to: 0
+      def jobs
+        @_jobs ||= 0
+      end
+
+      ##
+      # Allows the specs to stub the queued job count
+      # and return the desired amount
+      def jobs=(amount)
+        @_jobs = amount
+        self.stubs(:jobs).returns(amount)
+      end
+    end
+  end
+end
+
+describe HireFire::Environment::Base do
+
+  let(:base) { HireFire::Environment::Base.new }
+
+  describe 'testing the test setup' do
+    it 'should default the queued job count to 0 for these specs' do
+      base.jobs.should == 0
+    end
+
+    it 'should set the queued job count to 10' do
+      base.jobs = 10
+      base.jobs.should == 10
+    end
+
+    it 'should have zero workers by default' do
+      base.workers.should == 0
+    end
+
+    it 'should set the amount of workers to 10' do
+      base.workers = 10
+      base.workers.should == 10
+    end
+  end
+
+  describe '#fire' do
+    it 'should not fire any workers when there are still jobs in the queue' do
+      base.jobs    = 1
+      base.workers = 1
+
+      base.expects(:workers).with(0).never
+      base.fire
+    end
+
+    it 'should not fire any workers if there arent any workers' do
+      base.jobs    = 1
+      base.workers = 0
+
+      base.expects(:workers).with(0).never
+      base.fire
+    end
+
+    it 'should fire all workers when there arent any jobs' do
+      base.jobs    = 0
+      base.workers = 1
+
+      HireFire::Logger.expects(:message).with('All queued jobs have been processed. Firing all workers.')
+      base.expects(:workers).with(0).once
+      base.fire
+    end
+  end
+
+  describe '#hire' do
+    before do
+      base.stubs(:max_workers).returns(5)
+      base.stubs(:ratio).returns([
+        { :jobs => 1,  :workers => 1 },
+        { :jobs => 15, :workers => 2 },
+        { :jobs => 30, :workers => 3 },
+        { :jobs => 60, :workers => 4 },
+        { :jobs => 90, :workers => 5 }
+      ].reverse)
+    end
+
+    it 'should request 1 worker' do
+      base.jobs    = 1
+      base.workers = 0
+
+      HireFire::Logger.expects(:message).with('Hiring more workers so we have 1 in total.')
+      base.expects(:workers).with(1).once
+      base.hire
+    end
+
+    it 'should not request 1 worker, since there already is one worker running' do
+      base.jobs    = 5
+      base.workers = 1
+
+      base.expects(:workers).with(1).never
+      base.hire
+    end
+
+    it 'should request 2 workers' do
+      base.jobs    = 15
+      base.workers = 0
+
+      HireFire::Logger.expects(:message).with('Hiring more workers so we have 2 in total.')
+      base.expects(:workers).with(2).once
+      base.hire
+    end
+
+    it 'should request 2 workers' do
+      base.jobs    = 20
+      base.workers = 1
+
+      HireFire::Logger.expects(:message).with('Hiring more workers so we have 2 in total.')
+      base.expects(:workers).with(2).once
+      base.hire
+    end
+
+    it 'should not request 2 workers since we already have 2' do
+      base.jobs    = 25
+      base.workers = 2
+
+      base.expects(:workers).with(2).never
+      base.hire
+    end
+
+    it 'should NEVER lower the worker amount from the #hire method' do
+      base.jobs    = 25 # simulate that 5 jobs are already processed (30 - 5)
+      base.workers = 3  # and 3 workers are hired
+
+      HireFire::Logger.expects(:message).with('Hiring more workers so we have 2 in total.').never
+      base.expects(:workers).with(2).never
+      base.hire
+    end
+
+    it 'should NEVER higher more workers than the #max_workers' do
+      base.jobs    = 100
+      base.workers = 0
+
+      base.stubs(:max_workers).returns(3) # set the max_workers = 5
+
+      HireFire::Logger.expects(:message).with('Hiring more workers so we have 3 in total.').once
+      base.expects(:workers).with(3).once
+      base.hire
+    end
+  end
+end
