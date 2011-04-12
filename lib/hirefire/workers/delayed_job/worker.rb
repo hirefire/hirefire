@@ -1,5 +1,9 @@
 # encoding: utf-8
 
+##
+# HireFire
+# This is a HireFire modified version of
+# the official Delayed::Worker class
 module Delayed
   class Worker
 
@@ -42,10 +46,14 @@ module Delayed
         end
 
         ##
-        # If there are no jobs currently queued,
-        # and the worker is still running, it'll kill itself
+        # HireFire Hook
+        # After the last job in the queue finishes processing, Delayed::Job.new.jobs (queued.jobs)
+        # will return 0. This means that there aren't any more jobs to process for any of the workers.
+        # If this is the case it'll command the current environment to fire all the hired workers
+        # and then immediately break out of this infinite loop.
         if queued.jobs == 0
           Delayed::Job.environment.fire
+          break
         end
 
         break if $exit

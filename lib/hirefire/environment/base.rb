@@ -32,7 +32,7 @@ module HireFire
       #   # meaning that it'll ensure there are 3 workers running.
       #
       #   # If there were already were 3 workers, it'll leave it as is
-      #   
+      #
       #   # If there were more than 3 workers running (say, 4 or 5), it will NOT reduce
       #   # the number. This is because when you reduce the number of workers, you cannot
       #   # tell which worker Heroku will shut down, meaning you might interrupt a worker
