@@ -1,5 +1,9 @@
 # encoding: utf-8
 
+##
+# HireFire
+# This is a HireFire modified version of
+# the official Resque::Worker class
 module ::Resque
   class Worker
     def work(interval = 5.0, &block)

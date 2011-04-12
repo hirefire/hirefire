@@ -1,5 +1,9 @@
 # encoding: utf-8
 
+##
+# HireFire
+# This is a HireFire modified version of
+# the official Delayed::Worker class
 module Delayed
   class Worker
 

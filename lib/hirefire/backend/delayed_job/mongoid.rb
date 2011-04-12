@@ -11,7 +11,7 @@ module HireFire
         #
         # @return [Fixnum]
         def jobs
-          Delayed::Job.where(
+          ::Delayed::Job.where(
             :failed_at  => nil,
             :run_at.lte => Time.now
           ).count

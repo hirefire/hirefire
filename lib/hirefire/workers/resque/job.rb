@@ -1,5 +1,9 @@
 # encoding: utf-8
 
+##
+# HireFire
+# This is a HireFire modified version of
+# the official Resque::Job class
 module ::Resque
   class Job
     def perform
@@ -13,8 +17,6 @@ module ::Resque
       failure_hooks = Plugin.failure_hooks(job)
 
       begin
-        # Execute before_perform hook. Abort the job gracefully if
-        # Resque::DontPerform is raised.
         begin
           before_hooks.each do |hook|
             job.send(hook, *job_args)
@@ -23,13 +25,10 @@ module ::Resque
           return false
         end
 
-        # Execute the job. Do it in an around_perform hook if available.
         if around_hooks.empty?
           job.perform(*job_args)
           job_was_performed = true
         else
-          # We want to nest all around_perform plugins, with the last one
-          # finally calling perform
           stack = around_hooks.reverse.inject(nil) do |last_hook, hook|
             if last_hook
               lambda do
@@ -55,16 +54,12 @@ module ::Resque
         # we can fire all the hired workers
         ::Resque::Job.environment.fire
 
-        # Execute after_perform hook
         after_hooks.each do |hook|
           job.send(hook, *job_args)
         end
 
-        # Return true if the job was performed
         return job_was_performed
 
-      # If an exception occurs during the job execution, look for an
-      # on_failure hook then re-raise.
       rescue Object => e
         failure_hooks.each { |hook| job.send(hook, e, *job_args) }
         raise e

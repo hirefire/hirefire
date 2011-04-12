@@ -24,12 +24,12 @@ module HireFire
 
       ##
       # Initialize Delayed::Job extensions if Delayed::Job is found
-      if defined?(Delayed::Job)
+      if defined?(::Delayed::Job)
         ##
         # If DelayedJob is using ActiveRecord, then include
         # HireFire::Environment in to the ActiveRecord Delayed Job Backend
-        if defined?(Delayed::Backend::ActiveRecord::Job)
-          Delayed::Backend::ActiveRecord::Job.
+        if defined?(::Delayed::Backend::ActiveRecord::Job)
+          ::Delayed::Backend::ActiveRecord::Job.
           send(:include, HireFire::Environment).
           send(:include, HireFire::Backend)
         end
@@ -37,8 +37,8 @@ module HireFire
         ##
         # If DelayedJob is using Mongoid, then include
         # HireFire::Environment in to the Mongoid Delayed Job Backend
-        if defined?(Delayed::Backend::Mongoid::Job)
-          Delayed::Backend::Mongoid::Job.
+        if defined?(::Delayed::Backend::Mongoid::Job)
+          ::Delayed::Backend::Mongoid::Job.
           send(:include, HireFire::Environment).
           send(:include, HireFire::Backend)
         end

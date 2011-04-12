@@ -16,19 +16,19 @@ module HireFire
 
       ##
       # Delayed Job specific backends
-      if defined?(Delayed::Job)
-        if defined?(Delayed::Backend::ActiveRecord::Job)
+      if defined?(::Delayed::Job)
+        if defined?(::Delayed::Backend::ActiveRecord::Job)
           base.send(:include, HireFire::Backend::DelayedJob::ActiveRecord)
         end
 
-        if defined?(Delayed::Backend::Mongoid::Job)
+        if defined?(::Delayed::Backend::Mongoid::Job)
           base.send(:include, HireFire::Backend::DelayedJob::Mongoid)
         end
       end
 
       ##
       # Resque specific backends
-      if defined?(Resque)
+      if defined?(::Resque)
         base.send(:include, HireFire::Backend::Resque::Redis)
       end
     end

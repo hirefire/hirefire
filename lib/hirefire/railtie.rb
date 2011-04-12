@@ -27,7 +27,13 @@ module HireFire
     #   Delayed Job already has 'rake jobs:work' built in.
     #
     rake_tasks do
-      require File.join(WORKERS_PATH, 'resque', 'tasks')
+
+      ##
+      # If Resque is loaded, then we load the Resque rake task
+      # that'll allow Heroku to start up Resque as a worker
+      if defined?(::Resque)
+        require File.join(WORKERS_PATH, 'resque', 'tasks.rb')
+      end
     end
 
   end
