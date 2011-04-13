@@ -90,8 +90,20 @@ module HireFire
                 log_and_hire(ratio[:workers])
               end
 
-              break
+              return
             end
+          end
+
+          ##
+          # If no match is found in the above job/worker ratio loop, then we'll
+          # perform one last operation to see whether the the job count is greater
+          # than the highest job/worker ratio, and if this is the case then we also
+          # check to see whether the maximum amount of allowed workers is greater
+          # than the amount that are currently running, if this is the case, we are
+          # allowed to hire the max amount of workers.
+          if jobs_count >= ratio.first[:jobs] and max_workers > workers_count
+            log_and_hire(max_workers)
+            return
           end
         end
 

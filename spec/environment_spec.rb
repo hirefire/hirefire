@@ -178,6 +178,48 @@ describe HireFire::Environment::Base do
         base.hire
       end
 
+      it 'should not hire 5 workers even if defined in the job/ratio, when the limit is 3, it should hire 3 max' do
+        base.jobs    = 100
+        base.workers = 0
+
+        base.stubs(:max_workers).returns(3) # set the max_workers = 3
+        base.stubs(:ratio).returns([
+          { :jobs => 5, :workers => 5 }
+        ])
+
+        HireFire::Logger.expects(:message).with('Hiring more workers so we have 3 in total.').once
+        base.expects(:workers).with(3).once
+        base.hire
+      end
+
+      it 'should not hire (or invoke) any more workers since the max amount allowed is already running' do
+        base.jobs    = 100
+        base.workers = 3
+
+        base.stubs(:max_workers).returns(3) # set the max_workers = 3
+        base.stubs(:ratio).returns([
+          { :jobs => 5, :workers => 5 }
+        ])
+
+        HireFire::Logger.expects(:message).with('Hiring more workers so we have 3 in total.').never
+        base.expects(:workers).with(3).never
+        base.hire
+      end
+
+      it 'the max_workers option can only "limit" the amount of max_workers when used in the "Standard Notation"' do
+        base.jobs    = 100
+        base.workers = 0
+
+        base.stubs(:max_workers).returns(10) # set the max_workers = 10
+        base.stubs(:ratio).returns([
+          { :jobs => 5, :workers => 5 }
+        ])
+
+        HireFire::Logger.expects(:message).with('Hiring more workers so we have 5 in total.').once
+        base.expects(:workers).with(5).once
+        base.hire
+      end
+
       it 'should NEVER do API requests to Heroku if the max_workers are already running' do
         base.jobs    = 100
         base.workers = 5
@@ -259,6 +301,48 @@ describe HireFire::Environment::Base do
 
         HireFire::Logger.expects(:message).with('Hiring more workers so we have 3 in total.').once
         base.expects(:workers).with(3).once
+        base.hire
+      end
+
+      it 'should not hire 5 workers even if defined in the job/ratio, when the limit is 3, it should hire 3 max' do
+        base.jobs    = 100
+        base.workers = 0
+
+        base.stubs(:max_workers).returns(3) # set the max_workers = 3
+        base.stubs(:ratio).returns([
+          { :when => lambda { |jobs| jobs < 5 }, :workers => 5 }
+        ])
+
+        HireFire::Logger.expects(:message).with('Hiring more workers so we have 3 in total.').once
+        base.expects(:workers).with(3).once
+        base.hire
+      end
+
+      it 'should not hire (or invoke) any more workers since the max amount allowed is already running' do
+        base.jobs    = 100
+        base.workers = 3
+
+        base.stubs(:max_workers).returns(3) # set the max_workers = 3
+        base.stubs(:ratio).returns([
+          { :when => lambda { |jobs| jobs < 5 }, :workers => 5 }
+        ])
+
+        HireFire::Logger.expects(:message).with('Hiring more workers so we have 3 in total.').never
+        base.expects(:workers).with(3).never
+        base.hire
+      end
+
+      it 'the max_workers option can only "limit" the amount of max_workers when used in the "Standard Notation"' do
+        base.jobs    = 100
+        base.workers = 0
+
+        base.stubs(:max_workers).returns(10) # set the max_workers = 10
+        base.stubs(:ratio).returns([
+          { :when => lambda { |jobs| jobs < 5 }, :workers => 5 }
+        ])
+
+        HireFire::Logger.expects(:message).with('Hiring more workers so we have 10 in total.').once
+        base.expects(:workers).with(10).once
         base.hire
       end
 
