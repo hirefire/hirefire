@@ -11,7 +11,7 @@ module HireFire
         #
         # @return [Fixnum]
         def jobs
-          ::Resque.info[:pending].to_i
+          ::Resque.info[:pending].to_i + ::Resque.info[:working].to_i
         end
 
       end
