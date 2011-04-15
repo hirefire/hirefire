@@ -44,4 +44,24 @@ describe HireFire::Configuration do
       ]
   end
 
+  it 'should allow functional syntax' do
+    ratio = [
+      { :when => lambda {|jobs| jobs < 15 }, :workers => 1 },
+      { :when => lambda {|jobs| jobs < 35 }, :workers => 2 },
+      { :when => lambda {|jobs| jobs < 60 }, :workers => 3 },
+      { :when => lambda {|jobs| jobs < 80 }, :workers => 4 }
+    ]
+
+    HireFire.configure do |config|
+      config.environment      = :noop
+      config.max_workers      = 10
+      config.job_worker_ratio = ratio
+    end
+
+    configuration = HireFire.configuration
+
+    configuration.environment.should      == :noop
+    configuration.max_workers.should      == 10
+    configuration.job_worker_ratio.should == ratio
+  end
 end
