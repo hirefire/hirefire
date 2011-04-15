@@ -13,6 +13,7 @@ module ::Resque
 
       loop do
         break if shutdown?
+        ::Resque::Job.environment.hire
 
         if not @paused and job = reserve
           log "got: #{job.inspect}"
@@ -40,7 +41,7 @@ module ::Resque
           # If this is the case it'll command the current environment to fire all the hired workers
           # and then immediately break out of this infinite loop.
           if ::Resque::Job.jobs == 0
-           ::Resque::Job.environment.fire
+            ::Resque::Job.environment.fire
             break
           else
             sleep(interval)

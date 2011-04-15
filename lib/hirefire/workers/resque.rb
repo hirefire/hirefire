@@ -19,7 +19,10 @@ module ::Resque
     # After a new job gets queued, we command the current environment
     # to calculate the amount of workers we need to process the jobs
     # that are currently queued, and hire them accordingly.
-    ::Resque::Job.environment.hire
+    if ::Resque.info[:working].to_i == 0 \
+    or ::Resque.info[:jobs] == 1
+      ::Resque::Job.environment.hire
+    end
 
     Plugin.after_enqueue_hooks(klass).each do |hook|
       klass.send(hook, *args)
