@@ -1,7 +1,7 @@
 HireFire - The Heroku Worker Manager
 ====================================
 
-**HireFire automatically "hires" and "fires" (aka "scales") Delayed Job **(and soon Resque too!)** workers on Heroku**. When there are no queue jobs, HireFire will fire (shut down) all workers. If there are queued jobs, then it'll hire (spin up) workers. The amount of workers that get hired depends on the amount of queued jobs (the ratio can be configured by you). HireFire is great for both high, mid and low traffic applications. It can save you a lot of money by only hiring workers when there are pending jobs, and then firing them again once all the jobs have been processed. It's also capable to dramatically reducing processing time by automatically hiring more workers when the queue size increases.
+**HireFire automatically "hires" and "fires" (aka "scales") [Delayed Job](https://github.com/collectiveidea/delayed_job) and [Resque](https://github.com/defunkt/resque) workers on Heroku**. When there are no queue jobs, HireFire will fire (shut down) all workers. If there are queued jobs, then it'll hire (spin up) workers. The amount of workers that get hired depends on the amount of queued jobs (the ratio can be configured by you). HireFire is great for both high, mid and low traffic applications. It can save you a lot of money by only hiring workers when there are pending jobs, and then firing them again once all the jobs have been processed. It's also capable to dramatically reducing processing time by automatically hiring more workers when the queue size increases.
 
 **Low traffic example** say we have a small application that doesn't process for more than 2 hours in the background a month. Meanwhile, your worker is basically just idle the rest of the 718 hours in that month. Keeping that idle worker running costs $36/month ($0.05/hour). But, for the resources you're actually **making use of** (2 hours a month), you should be paying $0.10/month, not $36/month. This is what HireFire is for.
 
@@ -25,10 +25,11 @@ A painless process. In a Ruby on Rails environment you would do something like t
 **Rails.root/Gemfile**
 
     gem 'rails'
-    gem 'delayed_job'
+    # gem 'delayed_job' # uncomment this line if you use Delayed Job
+    # gem 'resque'      # uncomment this line if you use Resque
     gem 'hirefire'
 
-**(The order is important: Delayed Job > HireFire)**
+**(The order is important: "Delayed Job" / "Resque" > HireFire)**
 
 Be sure to add the following Heroku environment variables so HireFire can manage your workers.
 
@@ -41,7 +42,8 @@ And that's it. Next time you deploy to [Heroku](http://heroku.com/) it'll automa
 **Rails.root/config/initializers/hirefire.rb**
 
     HireFire.configure do |config|
-      config.max_workers      = 5 # default is 1
+      config.environment      = nil # default in production is :heroku. default in development is :noop
+      config.max_workers      = 5   # default is 1
       config.job_worker_ratio = [
           { :jobs => 1,   :workers => 1 },
           { :jobs => 15,  :workers => 2 },
@@ -61,7 +63,7 @@ Basically what it comes down to is that we say **NEVER** to hire more than 5 wor
 
 Once all the jobs in the queue have been processed, it'll fire (shut down) all the workers and start with a single worker the next time a new job gets queued. And then the next time the queue hits 15 jobs mark, in which case the single worker isn't fast enough on it's own, it'll spin up the 2nd worker again.
 
-An alternative, functional approach **will be available in version 0.1.1** for defining the job/worker ratios in the configuration file:
+*If you prefer a more functional way of defining your job/worker ratio, you could use the following notation style:*
 
     HireFire.configure do |config|
       config.max_workers = 5
@@ -73,36 +75,37 @@ An alternative, functional approach **will be available in version 0.1.1** for d
       ]
     end
 
+The above notation is slightly different, since now you basically define how many workers to hire when `jobs < n`. So for example if there are 80 or more jobs, it'll hire the `max_workers` amount, which is `5` in the above example. If you change the `max_workers = 5` to `max_workers = 10`, then if there are 80 or more jobs queued, it'll go from 4 to 10 workers.
+
 
 In a non-Ruby on Rails environment
 ----------------------------------
 
-Almost the same setup, except that you have to initialize HireFire yourself after Delayed Job is done loading.
+Almost the same setup, except that you have to initialize HireFire yourself after Delayed Job or Resque is done loading.
 
     require 'delayed_job'
-    require 'hirefire'
+    # require 'delayed_job' # uncomment this line if you use Delayed Job
+    # require 'resque'      # uncomment this line if you use Resque
     HireFire::Initializer.initialize!
 
-**(Again, the order is important: Delayed Job > HireFire)**
+**(Again, the order is important: "Delayed Job" / "Resque" > HireFire)**
 
 If all goes well you should see a message similar to this when you boot your application:
 
     [HireFire] Delayed::Backend::ActiveRecord::Job detected!
 
 
-Mapper Support
+Worker / Mapper Support
 --------------
 
-* [ActiveRecord ORM](https://github.com/rails/rails/tree/master/activerecord)
-* [Mongoid ODM](https://github.com/mongoid/mongoid) (using [delayed_job_mongoid](https://github.com/collectiveidea/delayed_job_mongoid))
+HireFire currently works with the following worker and mapper libraries:
 
+- [Delayed Job](https://github.com/collectiveidea/delayed_job)
+  - [ActiveRecord ORM](https://github.com/rails/rails/tree/master/activerecord)
+  - [Mongoid ODM](https://github.com/mongoid/mongoid) (using [delayed_job_mongoid](https://github.com/collectiveidea/delayed_job_mongoid))
 
-Worker Support
---------------
-
-Currently only [Delayed Job](https://github.com/collectiveidea/delayed_job) with either [ActiveRecord ORM](https://github.com/rails/rails/tree/master/activerecord) and [Mongoid ODM](https://github.com/mongoid/mongoid).
-
-**UPDATE** [Resque](https://github.com/defunkt/resque) support will be added today or tomorrow! Have a working prototype already.
+- [Resque](https://github.com/defunkt/resque)
+  - [Redis](https://github.com/ezmobius/redis-rb)
 
 
 Frequently Asked Questions
