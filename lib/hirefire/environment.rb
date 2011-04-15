@@ -17,9 +17,9 @@ module HireFire
     # This instance is stored in the Class.environment class method
     #
     # The Delayed Job classes receive 3 hooks:
-    #  - environment.hire ( invoked when a job gets queued )
-    #  - environment.fire ( invoked when a queued job gets destroyed )
-    #  - environment.fire ( invoked when a queued job gets updated unless the job didn't fail )
+    #  - hirefire_hire      ( invoked when a job gets queued )
+    #  - environment.fire   ( invoked when a queued job gets destroyed )
+    #  - environment.fire   ( invoked when a queued job gets updated unless the job didn't fail )
     #
     # The Resque classes get their hooks injected from the HireFire::Initializer#initialize! method
     #
@@ -30,8 +30,10 @@ module HireFire
       ##
       # Only implement these hooks for Delayed::Job backends
       if base.name =~ /Delayed::Backend::(ActiveRecord|Mongoid)::Job/
+        base.send :extend, HireFire::Environment::DelayedJob::ClassMethods
+
         base.class_eval do
-          after_create  'self.class.environment.hire'
+          after_create  'self.class.hirefire_hire'
           after_destroy 'self.class.environment.fire'
           after_update  'self.class.environment.fire',
             :unless => Proc.new { |job| job.failed_at.nil? }
@@ -65,6 +67,35 @@ module HireFire
             ENV.include?('HEROKU_UPID') ? 'Heroku' : 'Noop'
           end
         ).new
+      end
+    end
+
+    ##
+    # Delayed Job specific module
+    module DelayedJob
+      module ClassMethods
+
+        ##
+        # This method is an attempt to improve web-request throughput.
+        #
+        # A class method for Delayed::Job which first checks if any worker is currently
+        # running by checking to see if there are any jobs locked by a worker. If there aren't
+        # any jobs locked by a worker there is a high chance that there aren't any workers running.
+        # If this is the case, then we sure also invoke the 'self.class.environment.hire' method
+        #
+        # Another check is to see if there is only 1 job (which is the one that
+        # was just added before this callback invoked). If this is the case
+        # then it's very likely there aren't any workers running and we should
+        # invoke the 'self.class.environment.hire' method to make sure this is the case.
+        #
+        # @return [nil]
+        def hirefire_hire
+          delayed_job = ::Delayed::Job.new
+          if delayed_job.workers == 0 \
+          or delayed_job.jobs    == 1
+            environment.hire
+          end
+        end
       end
     end
 
