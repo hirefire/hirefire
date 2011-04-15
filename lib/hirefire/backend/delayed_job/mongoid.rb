@@ -17,6 +17,15 @@ module HireFire
           ).count
         end
 
+        ##
+        # Counts the amount of jobs that are locked by a worker
+        #
+        # @return [Fixnum] the amount of (assumably working) workers
+        def workers
+          ::Delayed::Job.
+          where(:locked_by.ne => nil).count
+        end
+
       end
     end
   end
