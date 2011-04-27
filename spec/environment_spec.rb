@@ -228,6 +228,15 @@ describe HireFire::Environment::Base do
         base.expects(:workers).with(5).never
         base.hire
       end
+
+      it 'should NEVER do API requests to Heroku if the workers query returns nil' do
+        base.jobs    = 100
+        base.workers = nil
+
+        base.expects(:log_and_hire).never
+        base.expects(:fire).never
+        base.hire
+      end
     end
 
     describe 'the Lambda (functional) notation' do
