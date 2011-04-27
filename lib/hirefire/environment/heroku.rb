@@ -31,6 +31,12 @@ module HireFire
         # Sets the amount of Delayed Job
         # workers that need to be running on Heroku
         client.set_workers(ENV['APP_NAME'], amount)
+
+      rescue RestClient::Exception
+        # Heroku library uses rest-client, currently, and it is quite
+        # possible to receive RestClient exceptions through the client.
+        HireFire::Logger.message("Worker query request failed with #{ $!.class.name } #{ $!.message }")
+        nil
       end
 
       ##
