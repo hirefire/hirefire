@@ -16,7 +16,7 @@ module HireFire
 
       ##
       # Delayed Job specific backends
-      if defined?(::Delayed::Job)
+      if defined?(::Delayed)
         if defined?(::Delayed::Backend::ActiveRecord::Job)
           base.send(:include, HireFire::Backend::DelayedJob::ActiveRecord)
         end
@@ -35,3 +35,4 @@ module HireFire
 
   end
 end
+

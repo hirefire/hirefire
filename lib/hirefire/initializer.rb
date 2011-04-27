@@ -24,7 +24,7 @@ module HireFire
 
       ##
       # Initialize Delayed::Job extensions if Delayed::Job is found
-      if defined?(::Delayed::Job)
+      if defined?(::Delayed)
         ##
         # If DelayedJob is using ActiveRecord, then include
         # HireFire::Environment in to the ActiveRecord Delayed Job Backend
@@ -71,3 +71,4 @@ module HireFire
 
   end
 end
+
