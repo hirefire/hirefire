@@ -18,7 +18,11 @@ module HireFire
       # Delayed Job specific backends
       if defined?(::Delayed)
         if defined?(::Delayed::Backend::ActiveRecord::Job)
-          base.send(:include, HireFire::Backend::DelayedJob::ActiveRecord)
+          if ActiveRecord::VERSION::STRING >= '3.0.0'
+            base.send(:include, HireFire::Backend::DelayedJob::ActiveRecord)
+          else
+            base.send(:include, HireFire::Backend::DelayedJob::OldActiveRecord)
+          end
         end
 
         if defined?(::Delayed::Backend::Mongoid::Job)

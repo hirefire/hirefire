@@ -44,8 +44,9 @@ module HireFire
     ##
     # HireFire::Backend::DelayedJob namespace
     module DelayedJob
-      autoload :ActiveRecord, File.join(DELAYED_JOB_PATH, 'active_record')
-      autoload :Mongoid,      File.join(DELAYED_JOB_PATH, 'mongoid')
+      autoload :ActiveRecord,     File.join(DELAYED_JOB_PATH, 'active_record')
+      autoload :OldActiveRecord,  File.join(DELAYED_JOB_PATH, 'old_active_record')
+      autoload :Mongoid,          File.join(DELAYED_JOB_PATH, 'mongoid')
     end
 
     ##
