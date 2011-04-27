@@ -103,9 +103,10 @@ end
 # in their application manually, after loading the worker library (either "Delayed Job" or "Resque")
 # and the desired mapper (ActiveRecord, Mongoid or Redis)
 if defined?(Rails)
-  if Rails.version >= '3.0.0'
+  if defined?(Rails::Railtie)
     require File.join(HireFire::HIREFIRE_PATH, 'railtie')
   else
     HireFire::Initializer.initialize!
   end
 end
+
