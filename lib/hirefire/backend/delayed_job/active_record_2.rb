@@ -3,7 +3,7 @@
 module HireFire
   module Backend
     module DelayedJob
-      module OldActiveRecord
+      module ActiveRecord2
 
         ##
         # Counts the amount of queued jobs in the database,

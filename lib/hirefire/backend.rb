@@ -21,7 +21,7 @@ module HireFire
           if ActiveRecord::VERSION::STRING >= '3.0.0'
             base.send(:include, HireFire::Backend::DelayedJob::ActiveRecord)
           else
-            base.send(:include, HireFire::Backend::DelayedJob::OldActiveRecord)
+            base.send(:include, HireFire::Backend::DelayedJob::ActiveRecord2)
           end
         end
 
