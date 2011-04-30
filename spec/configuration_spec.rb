@@ -9,6 +9,7 @@ describe HireFire::Configuration do
 
     configuration.environment.should      == nil
     configuration.max_workers.should      == 1
+    configuration.min_workers.should      == 0
     configuration.job_worker_ratio.should == [
         { :jobs => 1,   :workers => 1 },
         { :jobs => 25,  :workers => 2 },
@@ -22,6 +23,7 @@ describe HireFire::Configuration do
     HireFire.configure do |config|
       config.environment      = :noop
       config.max_workers      = 10
+      config.min_workers      = 0
       config.job_worker_ratio = [
           { :jobs => 1,   :workers => 1 },
           { :jobs => 15,  :workers => 2 },
@@ -35,6 +37,7 @@ describe HireFire::Configuration do
 
     configuration.environment.should      == :noop
     configuration.max_workers.should      == 10
+    configuration.min_workers.should      == 0
     configuration.job_worker_ratio.should == [
         { :jobs => 1,   :workers => 1 },
         { :jobs => 15,  :workers => 2 },

@@ -160,13 +160,13 @@ module HireFire
       # or "updated, unless the job didn't fail"
       #
       # If there are workers active, but there are no more pending jobs,
-      # then fire all the workers
+      # then fire all the workers or set to the minimum_workers
       #
       # @return [nil]
       def fire
-        if jobs == 0 and workers > 0
-          Logger.message("All queued jobs have been processed. Firing all workers.")
-          workers(0)
+        if jobs == 0 and workers > min_workers
+          Logger.message("All queued jobs have been processed. " + (min_workers > 0 ? "Setting workers to #{min_workers}." : "Firing all workers."))
+          workers(min_workers)
         end
       end
 
@@ -188,6 +188,15 @@ module HireFire
       # @return [Fixnum] the max amount of workers that are allowed to run concurrently
       def max_workers
         HireFire.configuration.max_workers
+      end
+      
+      ##
+      # Wrapper method for HireFire.configuration
+      # Returns the min amount of workers that should always be running
+      #
+      # @return [Fixnum] the min amount of workers that should always be running
+      def min_workers
+        HireFire.configuration.min_workers
       end
 
       ##
