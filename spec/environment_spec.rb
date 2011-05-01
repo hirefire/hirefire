@@ -100,6 +100,16 @@ describe HireFire::Environment::Base do
       base.expects(:workers).with(0).once
       base.fire
     end
+    
+    it 'should set the workers to minimum workers when there arent any jobs' do
+      base.jobs    = 0
+      base.workers = 10
+      base.stubs(:min_workers).returns(2)
+      
+      HireFire::Logger.expects(:message).with('All queued jobs have been processed. Setting workers to 2.')
+      base.expects(:workers).with(2).once
+      base.fire
+    end
   end
 
   describe '#hire' do
