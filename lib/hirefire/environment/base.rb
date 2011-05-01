@@ -201,7 +201,7 @@ module HireFire
 
       ##
       # Wrapper method for HireFire.configuration
-      # Returns the job/worker ratio array (in reversed order)
+      # Returns the job/worker ratio array
       #
       # @return [Array] the array of hashes containing the job/worker ratio
       def ratio
