@@ -189,7 +189,7 @@ module HireFire
       def max_workers
         HireFire.configuration.max_workers
       end
-      
+
       ##
       # Wrapper method for HireFire.configuration
       # Returns the min amount of workers that should always be running

@@ -8,7 +8,7 @@ module HireFire
     #
     # @return [Fixnum] default: 1
     attr_accessor :max_workers
-    
+
     ##
     # Contains the min amount of workers that should always be running
     #
