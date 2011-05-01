@@ -91,7 +91,7 @@ module HireFire
         # @return [nil]
         def hirefire_hire
           delayed_job = ::Delayed::Job.new
-          if delayed_job.workers == 0 \
+          if delayed_job.working == 0 \
           or delayed_job.jobs    == 1
             environment.hire
           end

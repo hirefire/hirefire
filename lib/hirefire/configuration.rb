@@ -10,6 +10,12 @@ module HireFire
     attr_accessor :max_workers
 
     ##
+    # Contains the min amount of workers that should always be running
+    #
+    # @return [Fixnum] default: 0
+    attr_accessor :min_workers
+
+    ##
     # Contains the job/worker ratio which determines
     # how many workers need to be running depending on
     # the amount of pending jobs
@@ -33,6 +39,7 @@ module HireFire
     # @return [HireFire::Configuration]
     def initialize
       @max_workers      = 1
+      @min_workers      = 0
       @job_worker_ratio = [
           { :jobs => 1,   :workers => 1 },
           { :jobs => 25,  :workers => 2 },

@@ -100,6 +100,16 @@ describe HireFire::Environment::Base do
       base.expects(:workers).with(0).once
       base.fire
     end
+
+    it 'should set the workers to minimum workers when there arent any jobs' do
+      base.jobs    = 0
+      base.workers = 10
+      base.stubs(:min_workers).returns(2)
+
+      HireFire::Logger.expects(:message).with('All queued jobs have been processed. Setting workers to 2.')
+      base.expects(:workers).with(2).once
+      base.fire
+    end
   end
 
   describe '#hire' do
@@ -226,6 +236,15 @@ describe HireFire::Environment::Base do
 
         HireFire::Logger.expects(:message).with('Hiring more workers so we have 5 in total.').never
         base.expects(:workers).with(5).never
+        base.hire
+      end
+
+      it 'should NEVER do API requests to Heroku if the workers query returns nil' do
+        base.jobs    = 100
+        base.workers = nil
+
+        base.expects(:log_and_hire).never
+        base.expects(:fire).never
         base.hire
       end
     end

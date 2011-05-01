@@ -44,8 +44,9 @@ module HireFire
     ##
     # HireFire::Backend::DelayedJob namespace
     module DelayedJob
-      autoload :ActiveRecord, File.join(DELAYED_JOB_PATH, 'active_record')
-      autoload :Mongoid,      File.join(DELAYED_JOB_PATH, 'mongoid')
+      autoload :ActiveRecord,   File.join(DELAYED_JOB_PATH, 'active_record')
+      autoload :ActiveRecord2,  File.join(DELAYED_JOB_PATH, 'active_record_2')
+      autoload :Mongoid,        File.join(DELAYED_JOB_PATH, 'mongoid')
     end
 
     ##
@@ -72,6 +73,7 @@ module HireFire
   #   HireFire.configure do |config|
   #     config.environment      = nil
   #     config.max_workers      = 5
+  #     config.min_workers      = 0
   #     config.job_worker_ratio = [
   #       { :jobs => 1,   :workers => 1 },
   #       { :jobs => 15,  :workers => 2 },
@@ -103,9 +105,10 @@ end
 # in their application manually, after loading the worker library (either "Delayed Job" or "Resque")
 # and the desired mapper (ActiveRecord, Mongoid or Redis)
 if defined?(Rails)
-  if Rails.version >= '3.0.0'
+  if defined?(Rails::Railtie)
     require File.join(HireFire::HIREFIRE_PATH, 'railtie')
   else
     HireFire::Initializer.initialize!
   end
 end
+

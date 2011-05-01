@@ -15,7 +15,13 @@ module Delayed
     #   except for the following:
     #
     #   1. All ouput will now go through the HireFire::Logger.
-    #   2. When HireFire cannot find any jobs to process it sends the "fire"
+    #   2. Invoke the ::Delayed::Job.environment.hire method at every loop
+    #      to see whether we need to hire more workers so that we can delegate
+    #      this task to the workers, rather than the web servers to improve web-throughput
+    #      by avoiding any unnecessary API calls to Heroku.
+    #      If there are any workers running, then the front end will never invoke API calls
+    #      since the worker(s) can handle this itself.
+    #   3. When HireFire cannot find any jobs to process it sends the "fire"
     #      signal to all workers, ending all the processes simultaneously. The reason
     #      we wait for all the processes to finish before sending the signal is because it'll
     #      otherwise interrupt workers and leave jobs unfinished.
@@ -29,6 +35,7 @@ module Delayed
       queued = Delayed::Job.new
 
       loop do
+        ::Delayed::Job.environment.hire
         result = nil
 
         realtime = Benchmark.realtime do

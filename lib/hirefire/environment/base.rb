@@ -19,6 +19,7 @@ module HireFire
       #
       #   HireFire.configure do |config|
       #     config.max_workers      = 5
+      #     config.min_workers      = 0
       #     config.job_worker_ratio = [
       #       { :jobs => 1,   :workers => 1 },
       #       { :jobs => 15,  :workers => 2 },
@@ -60,7 +61,7 @@ module HireFire
       # @return [nil]
       def hire
         jobs_count    = jobs
-        workers_count = workers
+        workers_count = workers || return
 
         ##
         # Use "Standard Notation"
@@ -160,13 +161,13 @@ module HireFire
       # or "updated, unless the job didn't fail"
       #
       # If there are workers active, but there are no more pending jobs,
-      # then fire all the workers
+      # then fire all the workers or set to the minimum_workers
       #
       # @return [nil]
       def fire
-        if jobs == 0 and workers > 0
-          Logger.message("All queued jobs have been processed. Firing all workers.")
-          workers(0)
+        if jobs == 0 and workers > min_workers
+          Logger.message("All queued jobs have been processed. " + (min_workers > 0 ? "Setting workers to #{min_workers}." : "Firing all workers."))
+          workers(min_workers)
         end
       end
 
@@ -192,7 +193,16 @@ module HireFire
 
       ##
       # Wrapper method for HireFire.configuration
-      # Returns the job/worker ratio array (in reversed order)
+      # Returns the min amount of workers that should always be running
+      #
+      # @return [Fixnum] the min amount of workers that should always be running
+      def min_workers
+        HireFire.configuration.min_workers
+      end
+
+      ##
+      # Wrapper method for HireFire.configuration
+      # Returns the job/worker ratio array
       #
       # @return [Array] the array of hashes containing the job/worker ratio
       def ratio

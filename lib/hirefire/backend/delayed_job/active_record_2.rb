@@ -3,7 +3,7 @@
 module HireFire
   module Backend
     module DelayedJob
-      module ActiveRecord
+      module ActiveRecord2
 
         ##
         # Counts the amount of queued jobs in the database,
@@ -11,9 +11,9 @@ module HireFire
         #
         # @return [Fixnum] the amount of pending jobs
         def jobs
-          ::Delayed::Job.
-          where(:failed_at => nil).
-          where('run_at <= ?', Time.now).count
+          ::Delayed::Job.all(
+            :conditions => ['failed_at IS NULL and run_at <= ?', Time.now.utc]
+          ).count
         end
 
         ##
@@ -23,11 +23,13 @@ module HireFire
         #
         # @return [Fixnum] the amount of (assumably working) workers
         def working
-          ::Delayed::Job.
-          where('locked_by IS NOT NULL').count
+          ::Delayed::Job.all(
+            :conditions => 'locked_by IS NOT NULL'
+          ).count
         end
 
       end
     end
   end
 end
+
