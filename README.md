@@ -109,6 +109,52 @@ HireFire currently works with the following worker and mapper libraries:
   - [Redis](https://github.com/ezmobius/redis-rb)
 
 
+Suggestions, Bugs, Requests, Questions
+--------------------------------------
+
+View the [issue log](https://github.com/meskyanichi/hirefire/issues) and post them there.
+
+
+Contributors
+------------
+
+<table>
+  <tr>
+    <th>Contributor</th>
+    <th>Contribution</th>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/dirk" target="_blank">Dirk Gadsden ( dirk )</a></td>
+    <td>Implementing a more functional job/worker ratio notation using Lambda</td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/michelson" target="_blank">Miguel Michelson Martinez ( michelson )</a></td>
+    <td>Allowing HireFire to initialize in non-Ruby on Rails environments</td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/nbibler" target="_blank">Nathaniel Bibler ( nbibler )</a></td>
+    <td>Ensures that HireFire gracefully handles RestClient exceptions</td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/samoli" target="_blank">Sam Oliver ( samoli )</a></td>
+    <td>Adding the ability to specify a minimum amount of workers</td>
+  </tr>
+</table>
+
+
+Want to contribute?
+-------------------
+
+- Fork/Clone the **develop** branch
+- Write RSpec tests, and test against:
+  - Ruby 1.9.2
+  - Ruby 1.8.7
+  - Ruby Enterprise Edition 1.8.7
+- Try to keep the overall *structure / design* of the gem the same
+
+I can't guarantee I'll pull every pull request. Also, I may accept your pull request and drastically change parts to improve readability/maintainability. Feel free to discuss about improvements, new functionality/features in the [issue log](https://github.com/meskyanichi/hirefire/issues) before contributing if you need/want more information.
+
+
 Frequently Asked Questions
 --------------------------
 
@@ -137,7 +183,6 @@ Frequently Asked Questions
 
 - **Question:** *Can I process jobs faster with HireFire?*
   - **Answer:** When you run multiple jobs concurrently, you can speed up your processing dramatically. *Normally you wouldn't set the workers to 10 for example, but with HireFire you can tell it to Hire 10 workers when there are 50 jobs (would normally be overkill and cost you A LOT of money) but since (see Q/A above) Workers are pro-rated to the second, and HireFire immediately fires all workers once all the jobs in the queue have been processed, it makes no different whether you have a single worker processing 50 jobs, or 5 workers, or even 10 workers. It processes 10 times faster, but costs the same.*
-
 
 
 Other potentially interesting gems
