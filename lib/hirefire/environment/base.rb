@@ -60,7 +60,7 @@ module HireFire
       # @return [nil]
       def hire
         jobs_count    = jobs
-        workers_count = workers
+        workers_count = workers || return
 
         ##
         # Use "Standard Notation"
