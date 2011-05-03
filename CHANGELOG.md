@@ -1,9 +1,13 @@
 0.1.3 / 2011-05-01
 
+[full changelog](https://github.com/meskyanichi/hirefire/compare/0.1.2...0.1.3)
+
 * Enhancements
   * Bumps Heroku gem requirement to ~> 2.0
 
 0.1.2 / 2011-05-01
+
+[full changelog](https://github.com/meskyanichi/hirefire/compare/0.1.1...0.1.2)
 
 * Enhancements
   * Add min_workers option (Sam Oliver)
@@ -12,6 +16,8 @@
   * Performance improvements
 
 0.1.1 / 2011-04-15
+
+[full changelog](https://github.com/meskyanichi/hirefire/compare/0.1.0...0.1.1)
 
 * Enhancements
   * Add support for Resque workers
