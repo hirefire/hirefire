@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module HireFire
   module Backend
     module DelayedJob

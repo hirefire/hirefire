@@ -197,10 +197,10 @@ describe HireFire::Environment::Base do
           config.job_worker_ratio = [
             { :jobs => 5, :workers => 5 }
           ]
-          
+
           base.jobs    = 100
           base.workers = 0
-          
+
           HireFire::Logger.expects(:message).with('Hiring more workers so we have 3 in total.').once
           base.expects(:workers).with(3).once
           base.hire
@@ -213,7 +213,7 @@ describe HireFire::Environment::Base do
           config.job_worker_ratio = [
             { :jobs => 5, :workers => 5 }
           ]
-          
+
           base.jobs    = 100
           base.workers = 3
 
@@ -229,7 +229,7 @@ describe HireFire::Environment::Base do
           config.job_worker_ratio = [
             { :jobs => 5, :workers => 5 }
           ]
-          
+
           base.jobs    = 100
           base.workers = 0
 
@@ -328,7 +328,7 @@ describe HireFire::Environment::Base do
           config.max_workers = 3
           base.jobs    = 100
           base.workers = 0
-          
+
           HireFire::Logger.expects(:message).with('Hiring more workers so we have 3 in total.').once
           base.expects(:workers).with(3).once
           base.hire
@@ -341,13 +341,13 @@ describe HireFire::Environment::Base do
           config.job_worker_ratio = [
             { :when => lambda { |jobs| jobs < 5 }, :workers => 5 }
           ]
-          
+
           base.jobs    = 100
           base.workers = 0
-          
+
           HireFire::Logger.expects(:message).with('Hiring more workers so we have 3 in total.').once
           base.expects(:workers).with(3).once
-          base.hire   
+          base.hire
         end
       end
 
@@ -357,10 +357,10 @@ describe HireFire::Environment::Base do
           config.job_worker_ratio = [
             { :when => lambda { |jobs| jobs < 5 }, :workers => 5 }
           ]
-          
+
           base.jobs    = 100
           base.workers = 3
-          
+
           HireFire::Logger.expects(:message).with('Hiring more workers so we have 3 in total.').never
           base.expects(:workers).with(3).never
           base.hire
@@ -373,7 +373,7 @@ describe HireFire::Environment::Base do
           config.job_worker_ratio = [
             { :when => lambda { |jobs| jobs < 5 }, :workers => 5 }
           ]
-          
+
           base.jobs    = 100
           base.workers = 0
 

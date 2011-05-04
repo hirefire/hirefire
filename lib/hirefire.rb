@@ -9,9 +9,9 @@ module HireFire
   autoload :Version,       'hirefire/version'
 
   class << self
-    
+
     attr_writer :configuration
-    
+
     ##
     # This method is used to configure HireFire
     #
@@ -50,7 +50,7 @@ module HireFire
     def configuration
       @configuration ||= HireFire::Configuration.new
     end
-    
+
   end
 
 end
