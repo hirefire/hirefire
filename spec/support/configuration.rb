@@ -7,6 +7,7 @@ module ConfigurationHelper
     old_configuration = HireFire.configuration
     HireFire.configuration = HireFire::Configuration.new
     yield(HireFire.configuration)
+  ensure
     HireFire.configuration = old_configuration
   end
   
