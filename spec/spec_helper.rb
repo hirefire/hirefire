@@ -1,12 +1,8 @@
 # encoding: utf-8
+$:.unshift(File.expand_path('../', __FILE__))
+$:.unshift(File.expand_path('../../lib', __FILE__))
 
-##
-# Path to the lib directory
-LIB_PATH = File.expand_path('../../lib', __FILE__)
-
-##
-# Load the HireFire Ruby library
-require File.join(LIB_PATH, 'hirefire')
+require 'hirefire'
 
 # Requires supporting ruby files with custom matchers and macros, etc,
 # in spec/support/ and its subdirectories.

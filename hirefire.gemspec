@@ -1,6 +1,7 @@
 # encoding: utf-8
 
-require File.expand_path(File.dirname(__FILE__) + '/lib/hirefire')
+$:.push File.expand_path('../lib', __FILE__)
+require 'hirefire/version'
 
 Gem::Specification.new do |gem|
 

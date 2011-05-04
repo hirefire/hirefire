@@ -1,60 +1,12 @@
 # encoding: utf-8
 
 module HireFire
-
-  ##
-  # HireFire constants
-  LIB_PATH         = File.dirname(__FILE__)
-  HIREFIRE_PATH    = File.join(LIB_PATH,      'hirefire')
-  ENVIRONMENT_PATH = File.join(HIREFIRE_PATH, 'environment')
-  BACKEND_PATH     = File.join(HIREFIRE_PATH, 'backend')
-  WORKERS_PATH     = File.join(HIREFIRE_PATH, 'workers')
-
-  ##
-  # HireFire namespace
-  autoload :Configuration, File.join(HIREFIRE_PATH, 'configuration')
-  autoload :Environment,   File.join(HIREFIRE_PATH, 'environment')
-  autoload :Initializer,   File.join(HIREFIRE_PATH, 'initializer')
-  autoload :Backend,       File.join(HIREFIRE_PATH, 'backend')
-  autoload :Logger,        File.join(HIREFIRE_PATH, 'logger')
-  autoload :Version,       File.join(HIREFIRE_PATH, 'version')
-
-  ##
-  # HireFire::Environment namespace
-  module Environment
-    autoload :Base,   File.join(ENVIRONMENT_PATH, 'base')
-    autoload :Heroku, File.join(ENVIRONMENT_PATH, 'heroku')
-    autoload :Local,  File.join(ENVIRONMENT_PATH, 'local')
-    autoload :Noop,   File.join(ENVIRONMENT_PATH, 'noop')
-  end
-
-  ##
-  # HireFire::Workers namespace
-  module Workers
-    autoload :DelayedJob, File.join(WORKERS_PATH, 'delayed_job')
-    autoload :Resque,     File.join(WORKERS_PATH, 'resque')
-  end
-
-  ##
-  # HireFire::Backend namespace
-  module Backend
-    DELAYED_JOB_PATH = File.join(BACKEND_PATH, 'delayed_job')
-    RESQUE_PATH      = File.join(BACKEND_PATH, 'resque')
-
-    ##
-    # HireFire::Backend::DelayedJob namespace
-    module DelayedJob
-      autoload :ActiveRecord,   File.join(DELAYED_JOB_PATH, 'active_record')
-      autoload :ActiveRecord2,  File.join(DELAYED_JOB_PATH, 'active_record_2')
-      autoload :Mongoid,        File.join(DELAYED_JOB_PATH, 'mongoid')
-    end
-
-    ##
-    # HireFire::Backend::Resque namespace
-    module Resque
-      autoload :Redis, File.join(RESQUE_PATH, 'redis')
-    end
-  end
+  autoload :Configuration, 'hirefire/configuration'
+  autoload :Environment,   'hirefire/environment'
+  autoload :Initializer,   'hirefire/initializer'
+  autoload :Backend,       'hirefire/backend'
+  autoload :Logger,        'hirefire/logger'
+  autoload :Version,       'hirefire/version'
 
   class << self
     
@@ -112,7 +64,7 @@ end
 # and the desired mapper (ActiveRecord, Mongoid or Redis)
 if defined?(Rails)
   if defined?(Rails::Railtie)
-    require File.join(HireFire::HIREFIRE_PATH, 'railtie')
+    require 'hirefire/railtie'
   else
     HireFire::Initializer.initialize!
   end
