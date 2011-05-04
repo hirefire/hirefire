@@ -8,37 +8,12 @@ LIB_PATH = File.expand_path('../../lib', __FILE__)
 # Load the HireFire Ruby library
 require File.join(LIB_PATH, 'hirefire')
 
-module ConfigurationHelper
-  
-  def configure(&block)
-    HireFire.configure(&block)
-  end
-  
-  def with_configuration(&block)
-    old_configuration = HireFire.configuration
-    HireFire.configuration = HireFire::Configuration.new
-    yield(HireFire.configuration)
-    HireFire.configuration = old_configuration
-  end
-  
-  def with_max_workers(workers, &block)
-    with_configuration do |config|
-      config.max_workers = workers
-      yield
-    end
-  end
-  
-  def with_min_workers(workers, &block)
-    with_configuration do |config|
-      config.min_workers = workers
-      yield
-    end
-  end
-end
+# Requires supporting ruby files with custom matchers and macros, etc,
+# in spec/support/ and its subdirectories.
+Dir[File.join(File.expand_path('../support', __FILE__), '**/*.rb')].each {|f| require f}
 
 ##
 # Use Mocha to mock with RSpec
 RSpec.configure do |config|
   config.mock_with :mocha
-  config.include ConfigurationHelper
 end
