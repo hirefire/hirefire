@@ -46,7 +46,7 @@ module HireFire
         ##
         # Load Delayed Job extensions, this will patch Delayed::Worker
         # to implement the necessary hooks to invoke HireFire from
-        require File.join(HireFire::WORKERS_PATH, 'delayed_job')
+        require 'hirefire/workers/delayed_job'
       end
 
       ##
@@ -65,7 +65,7 @@ module HireFire
         ##
         # Load Resque extensions, this will patch Resque, Resque::Job and Resque::Worker
         # to implement the necessary hooks to invoke HireFire from
-        require File.join(HireFire::WORKERS_PATH, 'resque')
+        require 'hirefire/workers/resque'
       end
     end
 
