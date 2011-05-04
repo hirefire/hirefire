@@ -2,6 +2,10 @@
 
 module HireFire
   module Environment
+    autoload :Base,   'hirefire/environment/base'
+    autoload :Heroku, 'hirefire/environment/heroku'
+    autoload :Local,  'hirefire/environment/local'
+    autoload :Noop,   'hirefire/environment/noop'
 
     ##
     # This module gets included in either:
