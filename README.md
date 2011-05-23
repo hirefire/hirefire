@@ -17,6 +17,16 @@ Author
 Drop me a message for any questions, suggestions, requests, bugs or submit them to the [issue log](https://github.com/meskyanichi/hirefire/issues).
 
 
+HireFireApp.com - The Heroku Worker Monitor - BETA
+--------------------------------------------------
+
+I would like to announce the release of a **new service** I've been working on, called **HireFireApp**. The goal is essentially the same as the open source HireFire project, except that it's considered more **stable/reliable** and **a lot more performant**.
+
+The service is currently in beta, so feel free to create a free account!
+
+Check out the [official website](http://hirefireapp.com) for more information: [http://hirefireapp.com](http://hirefireapp.com)
+
+
 Setting it up
 -------------
 
