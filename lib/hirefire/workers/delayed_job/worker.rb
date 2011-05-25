@@ -59,8 +59,7 @@ module Delayed
         # If this is the case it'll command the current environment to fire all the hired workers
         # and then immediately break out of this infinite loop.
         if queued.jobs == 0
-          Delayed::Job.environment.fire
-          break
+          break if Delayed::Job.environment.fire
         end
 
         break if $exit
