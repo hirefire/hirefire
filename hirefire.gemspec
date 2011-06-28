@@ -1,6 +1,7 @@
 # encoding: utf-8
 
-require File.expand_path(File.dirname(__FILE__) + '/lib/hirefire')
+$:.push File.expand_path('../lib', __FILE__)
+require 'hirefire/version'
 
 Gem::Specification.new do |gem|
 
@@ -23,7 +24,7 @@ Gem::Specification.new do |gem|
 
   ##
   # Production gem dependencies
-  gem.add_dependency 'heroku', ['~> 2.0.0']
+  gem.add_dependency 'heroku', ['>= 1.4']
   gem.add_dependency 'rush',   ['~> 0.6.7']
 
 end

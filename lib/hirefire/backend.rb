@@ -2,6 +2,8 @@
 
 module HireFire
   module Backend
+    autoload :DelayedJob, 'hirefire/backend/delayed_job'
+    autoload :Resque,     'hirefire/backend/resque'
 
     ##
     # Load the correct module (ActiveRecord, Mongoid or Redis)

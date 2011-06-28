@@ -41,11 +41,10 @@ module ::Resque
           # If this is the case it'll command the current environment to fire all the hired workers
           # and then immediately break out of this infinite loop.
           if (::Resque::Job.jobs + ::Resque::Job.working) == 0
-            ::Resque::Job.environment.fire
-            break
-          else
-            sleep(interval)
+            break if ::Resque::Job.environment.fire
           end
+
+          sleep(interval)
 
         end
       end

@@ -163,12 +163,16 @@ module HireFire
       # If there are workers active, but there are no more pending jobs,
       # then fire all the workers or set to the minimum_workers
       #
-      # @return [nil]
+      # @return [Boolean] if the workers have been fired
       def fire
         if jobs == 0 and workers > min_workers
           Logger.message("All queued jobs have been processed. " + (min_workers > 0 ? "Setting workers to #{min_workers}." : "Firing all workers."))
           workers(min_workers)
+
+          return true
         end
+
+        return false
       end
 
       private

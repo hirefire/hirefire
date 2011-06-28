@@ -102,27 +102,30 @@ describe HireFire::Environment::Base do
     end
 
     it 'should set the workers to minimum workers when there arent any jobs' do
-      base.jobs    = 0
-      base.workers = 10
-      base.stubs(:min_workers).returns(2)
+      with_min_workers(2) do
+        base.jobs          = 0
+        base.workers       = 10
 
-      HireFire::Logger.expects(:message).with('All queued jobs have been processed. Setting workers to 2.')
-      base.expects(:workers).with(2).once
-      base.fire
+        HireFire::Logger.expects(:message).with('All queued jobs have been processed. Setting workers to 2.')
+        base.expects(:workers).with(2).once
+        base.fire
+      end
     end
   end
 
   describe '#hire' do
     describe 'the standard notation' do
       before do
-        base.stubs(:max_workers).returns(5)
-        base.stubs(:ratio).returns([
-          { :jobs => 1,  :workers => 1 },
-          { :jobs => 15, :workers => 2 },
-          { :jobs => 30, :workers => 3 },
-          { :jobs => 60, :workers => 4 },
-          { :jobs => 90, :workers => 5 }
-        ])
+        configure do |config|
+          config.max_workers = 5
+          config.job_worker_ratio = [
+            { :jobs => 1,  :workers => 1 },
+            { :jobs => 15, :workers => 2 },
+            { :jobs => 30, :workers => 3 },
+            { :jobs => 60, :workers => 4 },
+            { :jobs => 90, :workers => 5 }
+          ]
+        end
       end
 
       it 'should request 1 worker' do
@@ -178,56 +181,62 @@ describe HireFire::Environment::Base do
       end
 
       it 'should NEVER hire more workers than the #max_workers' do
-        base.jobs    = 100
-        base.workers = 0
+        with_max_workers(3) do
+          base.jobs    = 100
+          base.workers = 0
 
-        base.stubs(:max_workers).returns(3) # set the max_workers = 3
-
-        HireFire::Logger.expects(:message).with('Hiring more workers so we have 3 in total.').once
-        base.expects(:workers).with(3).once
-        base.hire
+          HireFire::Logger.expects(:message).with('Hiring more workers so we have 3 in total.').once
+          base.expects(:workers).with(3).once
+          base.hire
+        end
       end
 
       it 'should not hire 5 workers even if defined in the job/ratio, when the limit is 3, it should hire 3 max' do
-        base.jobs    = 100
-        base.workers = 0
+        with_configuration do |config|
+          config.max_workers = 3
+          config.job_worker_ratio = [
+            { :jobs => 5, :workers => 5 }
+          ]
 
-        base.stubs(:max_workers).returns(3) # set the max_workers = 3
-        base.stubs(:ratio).returns([
-          { :jobs => 5, :workers => 5 }
-        ])
+          base.jobs    = 100
+          base.workers = 0
 
-        HireFire::Logger.expects(:message).with('Hiring more workers so we have 3 in total.').once
-        base.expects(:workers).with(3).once
-        base.hire
+          HireFire::Logger.expects(:message).with('Hiring more workers so we have 3 in total.').once
+          base.expects(:workers).with(3).once
+          base.hire
+        end
       end
 
       it 'should not hire (or invoke) any more workers since the max amount allowed is already running' do
-        base.jobs    = 100
-        base.workers = 3
+        with_configuration do |config|
+          config.max_workers = 3
+          config.job_worker_ratio = [
+            { :jobs => 5, :workers => 5 }
+          ]
 
-        base.stubs(:max_workers).returns(3) # set the max_workers = 3
-        base.stubs(:ratio).returns([
-          { :jobs => 5, :workers => 5 }
-        ])
+          base.jobs    = 100
+          base.workers = 3
 
-        HireFire::Logger.expects(:message).with('Hiring more workers so we have 3 in total.').never
-        base.expects(:workers).with(3).never
-        base.hire
+          HireFire::Logger.expects(:message).with('Hiring more workers so we have 3 in total.').never
+          base.expects(:workers).with(3).never
+          base.hire
+        end
       end
 
       it 'the max_workers option can only "limit" the amount of max_workers when used in the "Standard Notation"' do
-        base.jobs    = 100
-        base.workers = 0
+        with_configuration do |config|
+          config.max_workers = 10
+          config.job_worker_ratio = [
+            { :jobs => 5, :workers => 5 }
+          ]
 
-        base.stubs(:max_workers).returns(10) # set the max_workers = 10
-        base.stubs(:ratio).returns([
-          { :jobs => 5, :workers => 5 }
-        ])
+          base.jobs    = 100
+          base.workers = 0
 
-        HireFire::Logger.expects(:message).with('Hiring more workers so we have 5 in total.').once
-        base.expects(:workers).with(5).once
-        base.hire
+          HireFire::Logger.expects(:message).with('Hiring more workers so we have 5 in total.').once
+          base.expects(:workers).with(5).once
+          base.hire
+        end
       end
 
       it 'should NEVER do API requests to Heroku if the max_workers are already running' do
@@ -251,13 +260,15 @@ describe HireFire::Environment::Base do
 
     describe 'the Lambda (functional) notation' do
       before do
-        base.stubs(:max_workers).returns(5)
-        base.stubs(:ratio).returns([
-          { :when => lambda {|jobs| jobs < 15 }, :workers => 1 },
-          { :when => lambda {|jobs| jobs < 30 }, :workers => 2 },
-          { :when => lambda {|jobs| jobs < 60 }, :workers => 3 },
-          { :when => lambda {|jobs| jobs < 90 }, :workers => 4 }
-        ])
+        configure do |config|
+          config.max_workers = 5
+          config.job_worker_ratio = [
+            { :when => lambda {|jobs| jobs < 15 }, :workers => 1 },
+            { :when => lambda {|jobs| jobs < 30 }, :workers => 2 },
+            { :when => lambda {|jobs| jobs < 60 }, :workers => 3 },
+            { :when => lambda {|jobs| jobs < 90 }, :workers => 4 }
+          ]
+        end
       end
 
       it 'should request 1 worker' do
@@ -313,56 +324,63 @@ describe HireFire::Environment::Base do
       end
 
       it 'should NEVER hire more workers than the #max_workers' do
-        base.jobs    = 100
-        base.workers = 0
+        with_configuration do |config|
+          config.max_workers = 3
+          base.jobs    = 100
+          base.workers = 0
 
-        base.stubs(:max_workers).returns(3) # set the max_workers = 3
-
-        HireFire::Logger.expects(:message).with('Hiring more workers so we have 3 in total.').once
-        base.expects(:workers).with(3).once
-        base.hire
+          HireFire::Logger.expects(:message).with('Hiring more workers so we have 3 in total.').once
+          base.expects(:workers).with(3).once
+          base.hire
+        end
       end
 
       it 'should not hire 5 workers even if defined in the job/ratio, when the limit is 3, it should hire 3 max' do
-        base.jobs    = 100
-        base.workers = 0
+        with_configuration do |config|
+          config.max_workers = 3
+          config.job_worker_ratio = [
+            { :when => lambda { |jobs| jobs < 5 }, :workers => 5 }
+          ]
 
-        base.stubs(:max_workers).returns(3) # set the max_workers = 3
-        base.stubs(:ratio).returns([
-          { :when => lambda { |jobs| jobs < 5 }, :workers => 5 }
-        ])
+          base.jobs    = 100
+          base.workers = 0
 
-        HireFire::Logger.expects(:message).with('Hiring more workers so we have 3 in total.').once
-        base.expects(:workers).with(3).once
-        base.hire
+          HireFire::Logger.expects(:message).with('Hiring more workers so we have 3 in total.').once
+          base.expects(:workers).with(3).once
+          base.hire
+        end
       end
 
       it 'should not hire (or invoke) any more workers since the max amount allowed is already running' do
-        base.jobs    = 100
-        base.workers = 3
+        with_configuration do |config|
+          config.max_workers = 3
+          config.job_worker_ratio = [
+            { :when => lambda { |jobs| jobs < 5 }, :workers => 5 }
+          ]
 
-        base.stubs(:max_workers).returns(3) # set the max_workers = 3
-        base.stubs(:ratio).returns([
-          { :when => lambda { |jobs| jobs < 5 }, :workers => 5 }
-        ])
+          base.jobs    = 100
+          base.workers = 3
 
-        HireFire::Logger.expects(:message).with('Hiring more workers so we have 3 in total.').never
-        base.expects(:workers).with(3).never
-        base.hire
+          HireFire::Logger.expects(:message).with('Hiring more workers so we have 3 in total.').never
+          base.expects(:workers).with(3).never
+          base.hire
+        end
       end
 
       it 'the max_workers option can only "limit" the amount of max_workers when used in the "Standard Notation"' do
-        base.jobs    = 100
-        base.workers = 0
+        with_configuration do |config|
+          config.max_workers = 10
+          config.job_worker_ratio = [
+            { :when => lambda { |jobs| jobs < 5 }, :workers => 5 }
+          ]
 
-        base.stubs(:max_workers).returns(10) # set the max_workers = 10
-        base.stubs(:ratio).returns([
-          { :when => lambda { |jobs| jobs < 5 }, :workers => 5 }
-        ])
+          base.jobs    = 100
+          base.workers = 0
 
-        HireFire::Logger.expects(:message).with('Hiring more workers so we have 10 in total.').once
-        base.expects(:workers).with(10).once
-        base.hire
+          HireFire::Logger.expects(:message).with('Hiring more workers so we have 10 in total.').once
+          base.expects(:workers).with(10).once
+          base.hire
+        end
       end
 
       it 'should NEVER do API requests to Heroku if the max_workers are already running' do
