@@ -13,7 +13,6 @@ module HireFire
         def jobs
           ::Delayed::Job.
           where(:failed_at => nil).count
-          #where('run_at <= ?', Time.now).count
         end
 
         ##
