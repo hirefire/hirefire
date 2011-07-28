@@ -17,16 +17,19 @@ Author
 Drop me a message for any questions, suggestions, requests, bugs or submit them to the [issue log](https://github.com/meskyanichi/hirefire/issues).
 
 
-HireFireApp.com - The Heroku Worker Manager - BETA
---------------------------------------------------
+[HireFireApp.com](http://hirefireapp.com/) - The Heroku Process Manager
+--------------------------------------------
 
-*This is not part of the "HireFire open source" project, but it could potentially help support my open source projects!*
+**This is not part of the open source HireFire**
 
-I would like to announce the release of a **new service** I've been working on, called **HireFireApp**. The goal is essentially the same as the open source HireFire project, except that it's considered more **stable/reliable** and **a lot more performant**.
+[HireFire](http://hirefireapp.com/)(Service) is a hosted service which is based on HireFire(Open Source). The reason this project came about is because of Heroku's platform constraints which made the Open Source project quite unstable/unreliable and reduced performance dramatically on HTTP requests (slow response times when new jobs are being queued). It is also hard to allow both worker as well as dyno scaling, and manage that from within the same process.
 
-The service is currently in beta, so feel free to create a free account and try it out!
+For this reason, I created a hosted web service, based on the open source project. Not only does it support **worker dyno scaling** but it also supports **web dyno scaling**. And next to Heroku's **Badious Bamboo** stack, it also supports Heroku's new stack, **Celadon Cedar**.
 
-Check out the [official website](http://hirefireapp.com) for more information: [http://hirefireapp.com](http://hirefireapp.com)
+If you're looking to scale either your web or worker dynos, on either Badious Bamboo or Celadon Cedar, be sure to check out the hosted service variant of the open source project.
+
+**[http://hirefireapp.com](http://hirefireapp.com)** - We're currently in public beta, so try it for free!
+
 
 
 Setting it up
