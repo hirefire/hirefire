@@ -7,8 +7,6 @@ HireFire - The Heroku Worker Manager
 
 **High traffic example** say we have a high traffic application that needs to process a lot of jobs. There may be "traffic spikes" from time to time. In this case you can take advantage of the **job\_worker\_ratio**. Since this is application-specific, HireFire allows you to define how many workers there should be running, depending on the amount of queued jobs there are (see example configuration below). HireFire will then spin up more workers as traffic increases so it can work through the queue faster, then when the jobs are all finished, it'll shut down all the workers again until the next job gets queued (in which case it'll start with only a single worker again).
 
-**Enough with the examples!** Read on to see how to set it, and configure it to your scaling and money saving needs.
-
 Author
 ------
 
@@ -26,9 +24,9 @@ Drop me a message for any questions, suggestions, requests, bugs or submit them 
 
 For this reason, I created a hosted web service, based on the open source project. Not only does it support **worker dyno scaling** but it also supports **web dyno scaling**. And next to Heroku's **Badious Bamboo** stack, it also supports Heroku's new stack, **Celadon Cedar**.
 
-If you're looking to scale either your web or worker dynos, on either Badious Bamboo or Celadon Cedar, be sure to check out the hosted service variant of the open source project.
+If you're looking to scale either your web or worker dynos, on either Badious Bamboo or Celadon Cedar, be sure to check out the HireFire hosted service.
 
-**[http://hirefireapp.com](http://hirefireapp.com)** - We're currently in public beta, so try it for free!
+**[http://hirefireapp.com](http://hirefireapp.com)**
 
 
 
