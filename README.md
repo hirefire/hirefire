@@ -15,6 +15,14 @@ Author
 Drop me a message for any questions, suggestions, requests, bugs or submit them to the [issue log](https://github.com/meskyanichi/hirefire/issues).
 
 
+Please Donate!
+--------------
+
+Please consider [DONATING](http://pledgie.com/campaigns/16066) to the HireFire project for the time and effort that was put in to developing the gem! Thanks!
+
+[![Donate to HireFire](http://pledgie.com/campaigns/16066.png)](http://pledgie.com/campaigns/16066)
+
+
 [HireFireApp.com](http://hirefireapp.com/) - The Heroku Process Manager
 --------------------------------------------
 
