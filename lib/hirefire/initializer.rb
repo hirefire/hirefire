@@ -44,6 +44,15 @@ module HireFire
         end
 
         ##
+        # If DelayedJob is using DataMapper, then include
+        # HireFire::Environment in to the DataMapper Delayed Job Backend
+        if defined?(::Delayed::Backend::DataMapper::Job)
+          ::Delayed::Backend::DataMapper::Job.
+          send(:include, HireFire::Environment).
+          send(:include, HireFire::Backend)
+        end
+
+        ##
         # Load Delayed Job extensions, this will patch Delayed::Worker
         # to implement the necessary hooks to invoke HireFire from
         require 'hirefire/workers/delayed_job'
