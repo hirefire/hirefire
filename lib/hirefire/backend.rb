@@ -27,6 +27,10 @@ module HireFire
           end
         end
 
+        if defined?(::Delayed::Backend::DataMapper::Job)
+          base.send(:include, HireFire::Backend::DelayedJob::DataMapper)
+        end
+
         if defined?(::Delayed::Backend::Mongoid::Job)
           base.send(:include, HireFire::Backend::DelayedJob::Mongoid)
         end
