@@ -14,19 +14,21 @@ module ::Resque
   def self.enqueue(klass, *args)
     Job.create(queue_from_class(klass), klass, *args)
 
-    ##
-    # HireFire Hook
-    # After a new job gets enqueued we check to see if there are currently
-    # any workers up and running. If this is the case then we do nothing and
-    # let the worker pick up the jobs (and potentially hire more workers)
-    #
-    # If there are no workers, then we manually hire workers.
-    if ::Resque::Job.workers == 0
-      ::Resque::Job.environment.hire
-    end
+    if not Resque.inline?
+      ##
+      # HireFire Hook
+      # After a new job gets enqueued we check to see if there are currently
+      # any workers up and running. If this is the case then we do nothing and
+      # let the worker pick up the jobs (and potentially hire more workers)
+      #
+      # If there are no workers, then we manually hire workers.
+      if ::Resque::Job.workers == 0
+        ::Resque::Job.environment.hire
+      end
 
-    Plugin.after_enqueue_hooks(klass).each do |hook|
-      klass.send(hook, *args)
+      Plugin.after_enqueue_hooks(klass).each do |hook|
+        klass.send(hook, *args)
+      end
     end
   end
 end
