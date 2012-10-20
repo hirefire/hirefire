@@ -11,7 +11,7 @@ module HireFire
       def workers(amount = nil)
 
         app_name = HireFire.configuration.app_name
-        puts "HIREFIRE FOR APP #{app_name}"
+        #puts "HIREFIRE FOR APP #{app_name}"
 
         if amount.nil?
           # return client.info(app_name)[:workers].to_i
