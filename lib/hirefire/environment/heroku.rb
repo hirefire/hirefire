@@ -27,7 +27,7 @@ module HireFire
       end
 
       def client
-        @client ||= Heroku::API.new # will pick up api_key from configs
+        @client ||= ::Heroku::API.new # will pick up api_key from configs
       end
 
     end
