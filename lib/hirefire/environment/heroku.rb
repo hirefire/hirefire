@@ -21,7 +21,7 @@ module HireFire
         # client.set_workers(app_name], amount)
         return client.post_ps_scale(app_name, "worker", amount)
 
-      rescue RestClient::Exception
+      rescue Exception
         HireFire::Logger.message("Worker query request failed with #{ $!.class.name } #{ $!.message }")
         nil
       end
