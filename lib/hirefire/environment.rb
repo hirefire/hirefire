@@ -82,7 +82,7 @@ module HireFire
           if environment = HireFire.configuration.environment
             environment.to_s.camelize
           else
-            ENV.include?('HEROKU_UPID') ? 'Heroku' : 'Noop'
+            ::Rails.env.production? ? 'Heroku' : 'Noop'
           end
         ).new
       end
