@@ -45,10 +45,12 @@ A painless process. In a Ruby on Rails environment you would do something like t
 
 **Rails.root/Gemfile**
 
-    gem 'rails'
-    # gem 'delayed_job' # uncomment this line if you use Delayed Job
-    # gem 'resque'      # uncomment this line if you use Resque
-    gem 'hirefire'
+```ruby
+gem 'rails'
+# gem 'delayed_job' # uncomment this line if you use Delayed Job
+# gem 'resque'      # uncomment this line if you use Resque
+gem 'hirefire'
+```
 
 **(The order is important: "Delayed Job" / "Resque" > HireFire)**
 
@@ -62,18 +64,20 @@ And that's it. Next time you deploy to [Heroku](http://heroku.com/) it'll automa
 
 **Rails.root/config/initializers/hirefire.rb**
 
-    HireFire.configure do |config|
-      config.environment      = nil # default in production is :heroku. default in development is :noop
-      config.max_workers      = 5   # default is 1
-      config.min_workers      = 0   # default is 0
-      config.job_worker_ratio = [
-          { :jobs => 1,   :workers => 1 },
-          { :jobs => 15,  :workers => 2 },
-          { :jobs => 35,  :workers => 3 },
-          { :jobs => 60,  :workers => 4 },
-          { :jobs => 80,  :workers => 5 }
-        ]
-    end
+```ruby
+HireFire.configure do |config|
+  config.environment      = nil # default in production is :heroku. default in development is :noop
+  config.max_workers      = 5   # default is 1
+  config.min_workers      = 0   # default is 0
+  config.job_worker_ratio = [
+      { :jobs => 1,   :workers => 1 },
+      { :jobs => 15,  :workers => 2 },
+      { :jobs => 35,  :workers => 3 },
+      { :jobs => 60,  :workers => 4 },
+      { :jobs => 80,  :workers => 5 }
+    ]
+end
+```
 
 Basically what it comes down to is that we say **NEVER** to hire more than 5 workers at a time (`config.max_workers = 5`). And then we define an array of hashes that represents our **job\_worker\_ratio**. In the above example we are basically saying:
 
@@ -87,15 +91,17 @@ Once all the jobs in the queue have been processed, it'll fire (shut down) all t
 
 *If you prefer a more functional way of defining your job/worker ratio, you could use the following notation style:*
 
-    HireFire.configure do |config|
-      config.max_workers = 5
-      config.job_worker_ratio = [
-        { :when => lambda {|jobs| jobs < 15 }, :workers => 1 },
-        { :when => lambda {|jobs| jobs < 35 }, :workers => 2 },
-        { :when => lambda {|jobs| jobs < 60 }, :workers => 3 },
-        { :when => lambda {|jobs| jobs < 80 }, :workers => 4 }
-      ]
-    end
+```ruby
+HireFire.configure do |config|
+  config.max_workers = 5
+  config.job_worker_ratio = [
+    { :when => lambda {|jobs| jobs < 15 }, :workers => 1 },
+    { :when => lambda {|jobs| jobs < 35 }, :workers => 2 },
+    { :when => lambda {|jobs| jobs < 60 }, :workers => 3 },
+    { :when => lambda {|jobs| jobs < 80 }, :workers => 4 }
+  ]
+end
+```
 
 The above notation is slightly different, since now you basically define how many workers to hire when `jobs < n`. So for example if there are 80 or more jobs, it'll hire the `max_workers` amount, which is `5` in the above example. If you change the `max_workers = 5` to `max_workers = 10`, then if there are 80 or more jobs queued, it'll go from 4 to 10 workers.
 
@@ -105,10 +111,12 @@ In a non-Ruby on Rails environment
 
 Almost the same setup, except that you have to initialize HireFire yourself after Delayed Job or Resque is done loading.
 
-    require 'delayed_job'
-    # require 'delayed_job' # uncomment this line if you use Delayed Job
-    # require 'resque'      # uncomment this line if you use Resque
-    HireFire::Initializer.initialize!
+```ruby
+require 'delayed_job'
+# require 'delayed_job' # uncomment this line if you use Delayed Job
+# require 'resque'      # uncomment this line if you use Resque
+HireFire::Initializer.initialize!
+```
 
 **(Again, the order is important: "Delayed Job" / "Resque" > HireFire)**
 
