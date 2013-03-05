@@ -1,28 +1,20 @@
 GEM
   remote: http://rubygems.org/
   specs:
-    configuration (1.2.0)
     diff-lcs (1.1.2)
+    excon (0.16.10)
     fattr (2.2.0)
     fuubar (0.0.3)
       rspec (~> 2.0)
       rspec-instafail (~> 0.1.4)
       ruby-progressbar (~> 0.0.9)
-    heroku (1.20.1)
-      launchy (~> 0.3.2)
-      rest-client (< 1.7.0, >= 1.4.0)
+    heroku-api (0.3.8)
+      excon (~> 0.16.10)
     infinity_test (1.0.2)
       notifiers (>= 1.1.0)
       watchr (>= 0.7)
-    launchy (0.3.7)
-      configuration (>= 0.0.5)
-      rake (>= 0.8.1)
-    mime-types (1.16)
     mocha (0.9.12)
     notifiers (1.1.0)
-    rake (0.8.7)
-    rest-client (1.6.1)
-      mime-types (>= 1.16)
     rspec (2.5.0)
       rspec-core (~> 2.5.0)
       rspec-expectations (~> 2.5.0)
@@ -45,7 +37,7 @@ PLATFORMS
 
 DEPENDENCIES
   fuubar
-  heroku
+  heroku-api
   infinity_test
   mocha
   rspec
