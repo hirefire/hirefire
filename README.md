@@ -7,8 +7,6 @@ HireFire - The Heroku Worker Manager
 
 **High traffic example** say we have a high traffic application that needs to process a lot of jobs. There may be "traffic spikes" from time to time. In this case you can take advantage of the **job\_worker\_ratio**. Since this is application-specific, HireFire allows you to define how many workers there should be running, depending on the amount of queued jobs there are (see example configuration below). HireFire will then spin up more workers as traffic increases so it can work through the queue faster, then when the jobs are all finished, it'll shut down all the workers again until the next job gets queued (in which case it'll start with only a single worker again).
 
-**Enough with the examples!** Read on to see how to set it, and configure it to your scaling and money saving needs.
-
 Author
 ------
 
@@ -17,16 +15,27 @@ Author
 Drop me a message for any questions, suggestions, requests, bugs or submit them to the [issue log](https://github.com/meskyanichi/hirefire/issues).
 
 
-HireFireApp.com - The Heroku Worker Manager - BETA
---------------------------------------------------
+Please Donate!
+--------------
 
-*This is not part of the "HireFire open source" project, but it could potentially help support my open source projects!*
+Please consider [DONATING](http://pledgie.com/campaigns/16066) to the HireFire project for the time and effort that was put in to developing the gem! Thanks!
 
-I would like to announce the release of a **new service** I've been working on, called **HireFireApp**. The goal is essentially the same as the open source HireFire project, except that it's considered more **stable/reliable** and **a lot more performant**.
+[![Donate to HireFire](http://pledgie.com/campaigns/16066.png)](http://pledgie.com/campaigns/16066)
 
-The service is currently in beta, so feel free to create a free account and try it out!
 
-Check out the [official website](http://hirefireapp.com) for more information: [http://hirefireapp.com](http://hirefireapp.com)
+[HireFireApp.com](http://hirefireapp.com/) - The Heroku Process Manager
+--------------------------------------------
+
+**This is not part of the open source HireFire**
+
+[HireFire](http://hirefireapp.com/)(Service) is a hosted service which is based on HireFire(Open Source). The reason this project came about is because of Heroku's platform constraints which made the Open Source project quite unstable/unreliable and reduced performance dramatically on HTTP requests (slow response times when new jobs are being queued). It is also hard to allow both worker as well as dyno scaling, and manage that from within the same process.
+
+For this reason, I created a hosted web service, based on the open source project. Not only does it support **worker dyno scaling** but it also supports **web dyno scaling**. And next to Heroku's **Badious Bamboo** stack, it also supports Heroku's new stack, **Celadon Cedar**.
+
+If you're looking to scale either your web or worker dynos, on either Badious Bamboo or Celadon Cedar, be sure to check out the HireFire hosted service.
+
+**[http://hirefireapp.com](http://hirefireapp.com)**
+
 
 
 Setting it up

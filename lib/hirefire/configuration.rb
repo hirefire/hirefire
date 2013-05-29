@@ -31,6 +31,8 @@ module HireFire
     # @return [Symbol, nil] default: nil
     attr_accessor :environment
 
+    attr_accessor :app_name
+
     ##
     # Instantiates a new HireFire::Configuration object
     # with the default configuration. These default configurations
@@ -38,6 +40,7 @@ module HireFire
     #
     # @return [HireFire::Configuration]
     def initialize
+      @app_name = ENV["APP_NAME"]
       @max_workers      = 1
       @min_workers      = 0
       @job_worker_ratio = [

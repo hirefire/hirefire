@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-require 'heroku'
+require 'heroku-api'
 
 module HireFire
   module Environment
@@ -8,43 +8,26 @@ module HireFire
 
       private
 
-      ##
-      # Either retrieves the amount of currently running workers,
-      # or set the amount of workers to a specific amount by providing a value
-      #
-      # @overload workers(amount = nil)
-      #   @param [Fixnum] amount will tell heroku to run N workers
-      #   @return [nil]
-      # @overload workers(amount = nil)
-      #   @param [nil] amount
-      #   @return [Fixnum] will request the amount of currently running workers from Heroku
       def workers(amount = nil)
 
-        #
-        # Returns the amount of Delayed Job
-        # workers that are currently running on Heroku
+        app_name = HireFire.configuration.app_name
+        #puts "HIREFIRE FOR APP #{app_name}"
+
         if amount.nil?
-          return client.info(ENV['APP_NAME'])[:workers].to_i
+          # return client.info(app_name)[:workers].to_i
+          return client.get_ps(app_name).body.select {|p| p['process'] =~ /worker.[0-9]+/}.length
         end
 
-        ##
-        # Sets the amount of Delayed Job
-        # workers that need to be running on Heroku
-        client.set_workers(ENV['APP_NAME'], amount)
+        # client.set_workers(app_name], amount)
+        return client.post_ps_scale(app_name, "worker", amount)
 
-      rescue RestClient::Exception
-        # Heroku library uses rest-client, currently, and it is quite
-        # possible to receive RestClient exceptions through the client.
+      rescue Exception
         HireFire::Logger.message("Worker query request failed with #{ $!.class.name } #{ $!.message }")
         nil
       end
 
-      ##
-      # @return [Heroku::Client] instance of the heroku client
       def client
-        @client ||= ::Heroku::Client.new(
-          ENV['HIREFIRE_EMAIL'], ENV['HIREFIRE_PASSWORD']
-        )
+        @client ||= ::Heroku::API.new # will pick up api_key from configs
       end
 
     end

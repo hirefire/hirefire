@@ -24,7 +24,7 @@ Gem::Specification.new do |gem|
 
   ##
   # Production gem dependencies
-  gem.add_dependency 'heroku', ['>= 1.4']
+  gem.add_dependency 'heroku-api', ['~> 0.3.5']
   gem.add_dependency 'rush',   ['~> 0.6.7']
 
 end

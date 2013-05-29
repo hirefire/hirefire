@@ -42,6 +42,20 @@ module HireFire
           after_update  'self.class.environment.fire',
             :unless => Proc.new { |job| job.failed_at.nil? }
         end
+      elsif base.name == "Delayed::Backend::DataMapper::Job"
+        base.send :extend, HireFire::Environment::DelayedJob::ClassMethods
+
+        base.class_eval do
+          after :create do
+            self.class.hirefire_hire
+          end
+          after :destroy do
+            self.class.environment.fire
+          end
+          after :update do
+            self.class.environment.fire unless self.failed_at.nil?
+          end
+        end
       end
 
       Logger.message("#{ base.name } detected!")
@@ -68,7 +82,7 @@ module HireFire
           if environment = HireFire.configuration.environment
             environment.to_s.camelize
           else
-            ENV.include?('HEROKU_UPID') ? 'Heroku' : 'Noop'
+            ::Rails.env.production? ? 'Heroku' : 'Noop'
           end
         ).new
       end
