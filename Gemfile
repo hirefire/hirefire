@@ -1,6 +1,9 @@
 # encoding: utf-8
 
 source 'http://rubygems.org'
+source "http://tgpgems:c3po42@gems.thegiantpixel.com/"
+
+gem 'tgp_gem', :path => "../tgp_gem"
 
 ##
 # Define gems to be used in the 'test' environment
