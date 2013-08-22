@@ -20,7 +20,7 @@ module ::Resque
           run_hook :before_fork, job
           working_on job
 
-          if @child = fork
+          if @child = fork(job)
             rand # Reseeding
             procline "Forked #{@child} at #{Time.now.to_i}"
             Process.wait
