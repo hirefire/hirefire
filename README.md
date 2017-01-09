@@ -1,32 +1,33 @@
-HireFire - The Heroku Worker Manager
-====================================
+## [HireFire.io] - Autoscaling for your Heroku dynos (Hosted Service)
 
-**HireFire automatically "hires" and "fires" (aka "scales") [Delayed Job](https://github.com/collectiveidea/delayed_job) and [Resque](https://github.com/defunkt/resque) workers on Heroku**. When there are no queue jobs, HireFire will fire (shut down) all workers. If there are queued jobs, then it'll hire (spin up) workers. The amount of workers that get hired depends on the amount of queued jobs (the ratio can be configured by you). HireFire is great for both high, mid and low traffic applications. It can save you a lot of money by only hiring workers when there are pending jobs, and then firing them again once all the jobs have been processed. It's also capable to dramatically reducing processing time by automatically hiring more workers when the queue size increases.
+**Note: This is not part of the open source variant**
 
-**Low traffic example** say we have a small application that doesn't process for more than 2 hours in the background a month. Meanwhile, your worker is basically just idle the rest of the 718 hours in that month. Keeping that idle worker running costs $36/month ($0.05/hour). But, for the resources you're actually **making use of** (2 hours a month), you should be paying $0.10/month, not $36/month. This is what HireFire is for.
+[HireFire] is a hosted service for auto-scaling both web- and worker dynos. The service supports practically any worker library across all programming languages through an abstract interface. For worker dynos it does provide a handful of convenient macros for calculating queue depths for various worker libraries (like Delayed Job, Resque, Qu, QueueClassic, Sidekiq, Bunny, Que).
 
-**High traffic example** say we have a high traffic application that needs to process a lot of jobs. There may be "traffic spikes" from time to time. In this case you can take advantage of the **job\_worker\_ratio**. Since this is application-specific, HireFire allows you to define how many workers there should be running, depending on the amount of queued jobs there are (see example configuration below). HireFire will then spin up more workers as traffic increases so it can work through the queue faster, then when the jobs are all finished, it'll shut down all the workers again until the next job gets queued (in which case it'll start with only a single worker again).
+In addition to autoscaling worker dynos, the service also autoscales web dynos. To do this we leverage the Heroku Logplex, allowing your application (again, in any programming language) to scale based on response times, rpm or dyno (cpu) load.
 
+Aside from scaling based on variables such as queue depths, response times, rpm and load, you can also configure time ranges to schedule scaling operations on every minute of the week to meet your demands. You can even do this exclusively (without auto-scaling) if you wish.
 
-[HireFire.io](http://hirefire.io/) - Dyno management for Heroku
---------------------------------------------
+For a mere $10/mo per app we've got you covered.
 
-**This is not part of the open source HireFire**
-
-[HireFire](http://hirefire.io/)(Service) is a hosted service which is based on HireFire(Open Source). The reason this project came about is because of Heroku's platform constraints which made the Open Source project quite unstable/unreliable and reduced performance dramatically on HTTP requests (slow response times when new jobs are being queued). It is also hard to allow both worker as well as dyno scaling, and manage that from within the same process.
-
-For this reason, I created a hosted web service, based on the open source project. Not only does it support **worker dyno scaling** but it also supports **web dyno scaling**. And next to Heroku's **Badious Bamboo** stack, it also supports Heroku's new stack, **Celadon Cedar**.
-
-If you're looking to scale either your web or worker dynos, on either Badious Bamboo or Celadon Cedar, be sure to check out the HireFire hosted service.
-
-**[http://hirefire.io](http://hirefire.io)**
+Check out the [home page] and [docs] for more information.
 
 
+---
 
-Setting it up
--------------
 
-A painless process. In a Ruby on Rails environment you would do something like this.
+## HireFire - Autoscaling for your Heroku workers (Open Source)
+
+HireFire automatically scales your Heroku workers up- and down based on the size of queues. This library was specifically designed to work with [Delayed Job] and [Resque].
+
+If you have a small application that only processes maybe 2 hours worth of background jobs a month, and you're letting the worker run 24/7, it'll end up costing you $25/mo (assuming Standard-1X size). Rather than letting said worker run 24/7, HireFire can scale it down when you don't have jobs to process, resulting in a bill of $0.07/mo, rather than $25/mo.
+
+If you have a medium-to-large application, this can result in significant cost savings depending on the nature of your application. Additionally, auto-scaling also ensures that your application doesn't build up a large backlog of jobs. Another benefit is the ability to quickly spin up a lot of workers for a short period of time to process jobs faster (in parallel), without the additional cost because Heroku Dynos are pro-rated to the second. So, whether you run 1 worker for 1 hour, or 6 dynos for 10 minutes, the cost is the same, but your jobs are processed 6 times faster.
+
+
+## Setting it up
+
+In a Ruby on Rails environment, add the following:
 
 **Rails.root/Gemfile**
 
@@ -41,9 +42,9 @@ Be sure to add the following Heroku environment variables so HireFire can manage
 
     heroku config:add HIREFIRE_EMAIL=<your_email> HIREFIRE_PASSWORD=<your_password>
 
-These are the same email and password credentials you use to log in to the Heroku web interface to manage your workers.
+These are the same email and password credentials you use to log in to the Heroku web interface to manage your workers. Note that you can also use your Heroku API token in the `HIREFIRE_PASSWORD` environment variable. You can get your Heroku API token from the Heroku UI or via the CLI with `heroku auth:token`.
 
-And that's it. Next time you deploy to [Heroku](http://heroku.com/) it'll automatically hire and fire your workers. Now, there are defaults, but I highly recommend you configure it since it only takes a few seconds. Create an initializer file:
+That's all you need to do to get the default configuration set up. You'll probably want to tailor the auto-scaling configuration to your application's requirements. Create an initializer (or similar configuration file that's loaded at boot-time) and configure HireFire's scaling behavior like so:
 
 **Rails.root/config/initializers/hirefire.rb**
 
@@ -60,17 +61,19 @@ And that's it. Next time you deploy to [Heroku](http://heroku.com/) it'll automa
         ]
     end
 
-Basically what it comes down to is that we say **NEVER** to hire more than 5 workers at a time (`config.max_workers = 5`). And then we define an array of hashes that represents our **job\_worker\_ratio**. In the above example we are basically saying:
+Once done, you're ready to deploy to [Heroku].
 
-* Hire 1 worker if there are 1-14 queued jobs
-* Hire 2 workers if there are 15-34 queued jobs
-* Hire 3 workers if there are 35-59 queued jobs
-* Hire 4 workers if there are 60-79 queued jobs
-* Hire 5 workers if there are more than 80 queued jobs
+What the above configuration does: It ensures that you never have more than 5 workers at a time (`config.max_workers = 5`). And then we define an array of hashes that represent our job:worker ratio. In the above example we are basically saying:
 
-Once all the jobs in the queue have been processed, it'll fire (shut down) all the workers and start with a single worker the next time a new job gets queued. And then the next time the queue hits 15 jobs mark, in which case the single worker isn't fast enough on it's own, it'll spin up the 2nd worker again.
+* Hire (= scale up) 1 worker if there are 1-14 queued jobs
+* Hire (= scale up) 2 workers if there are 15-34 queued jobs
+* Hire (= scale up) 3 workers if there are 35-59 queued jobs
+* Hire (= scale up) 4 workers if there are 60-79 queued jobs
+* Hire (= scale up) 5 workers if there are more than 80 queued jobs
 
-*If you prefer a more functional way of defining your job/worker ratio, you could use the following notation style:*
+Once all the jobs in the queue have been processed, it'll fire (= scale down) all the workers and start with a single worker the next time a new job gets queued. The next time the queue hits the 15 jobs mark, in which case the single worker isn't sufficient, it'll spin up the second worker, and at 35 jobs a third, etc.
+
+*If you prefer a more functional way of defining your job:worker ratio, you could use the following notation style:*
 
     HireFire.configure do |config|
       config.max_workers = 5
@@ -85,10 +88,9 @@ Once all the jobs in the queue have been processed, it'll fire (shut down) all t
 The above notation is slightly different, since now you basically define how many workers to hire when `jobs < n`. So for example if there are 80 or more jobs, it'll hire the `max_workers` amount, which is `5` in the above example. If you change the `max_workers = 5` to `max_workers = 10`, then if there are 80 or more jobs queued, it'll go from 4 to 10 workers.
 
 
-In a non-Ruby on Rails environment
-----------------------------------
+## In a non-Ruby on Rails environment
 
-Almost the same setup, except that you have to initialize HireFire yourself after Delayed Job or Resque is done loading.
+Almost the same setup, except that you have to initialize HireFire yourself after [Delayed Job] or [Resque] is done loading.
 
     require 'delayed_job'
     # require 'delayed_job' # uncomment this line if you use Delayed Job
@@ -102,27 +104,23 @@ If all goes well you should see a message similar to this when you boot your app
     [HireFire] Delayed::Backend::ActiveRecord::Job detected!
 
 
-Worker / Mapper Support
---------------
+## Worker / Mapper Support
 
 HireFire currently works with the following worker and mapper libraries:
 
-- [Delayed Job](https://github.com/collectiveidea/delayed_job)
-  - [ActiveRecord ORM](https://github.com/rails/rails/tree/master/activerecord)
-  - [Mongoid ODM](https://github.com/mongoid/mongoid) (using [delayed_job_mongoid](https://github.com/collectiveidea/delayed_job_mongoid))
+- [Delayed Job]
+  - [ActiveRecord ORM]
 
-- [Resque](https://github.com/defunkt/resque)
-  - [Redis](https://github.com/ezmobius/redis-rb)
-
-
-Suggestions, Bugs, Requests, Questions
---------------------------------------
-
-View the [issue log](https://github.com/meskyanichi/hirefire/issues) and post them there.
+- [Resque]
+  - [Redis]
 
 
-Contributors
-------------
+## Suggestions, Bugs, Requests, Questions
+
+View the [issue tracker] and post them there.
+
+
+## Contributors
 
 <table>
   <tr>
@@ -148,21 +146,7 @@ Contributors
 </table>
 
 
-Want to contribute?
--------------------
-
-- Fork/Clone the **develop** branch
-- Write RSpec tests, and test against:
-  - Ruby 1.9.2
-  - Ruby 1.8.7
-  - Ruby Enterprise Edition 1.8.7
-- Try to keep the overall *structure / design* of the gem the same
-
-I can't guarantee I'll pull every pull request. Also, I may accept your pull request and drastically change parts to improve readability/maintainability. Feel free to discuss about improvements, new functionality/features in the [issue log](https://github.com/meskyanichi/hirefire/issues) before contributing if you need/want more information.
-
-
-Frequently Asked Questions
---------------------------
+## Frequently Asked Questions
 
 - **Question:** *Does it start workers immediately after a job gets queued?*
   - **Answer:** Yes, once a new job gets queued it'll immediately calculate the amount of workers that are required and hire them accordingly.
@@ -191,9 +175,20 @@ Frequently Asked Questions
   - **Answer:** When you run multiple jobs concurrently, you can speed up your processing dramatically. *Normally you wouldn't set the workers to 10 for example, but with HireFire you can tell it to Hire 10 workers when there are 50 jobs (would normally be overkill and cost you A LOT of money) but since (see Q/A above) Workers are pro-rated to the second, and HireFire immediately fires all workers once all the jobs in the queue have been processed, it makes no different whether you have a single worker processing 50 jobs, or 5 workers, or even 10 workers. It processes 10 times faster, but costs the same.*
 
 
-Other potentially interesting gems
-----------------------------------
+## Author / License
 
-* [Backup](https://github.com/meskyanichi/backup)
-* [GitPusshuTen](https://github.com/meskyanichi/gitpusshuten)
-* [Mongoid::Paperclip](https://github.com/meskyanichi/mongoid-paperclip)
+Released under the [MIT License] by [Michael van Rooijen] of [HireFire].
+
+
+[HireFire]: https://www.hirefire.io/
+[HireFire.io]: https://www.hirefire.io/
+[Heroku]: https://www.heroku.com
+[Delayed Job]: https://github.com/collectiveidea/delayed_job
+[ActiveRecord ORM]: https://github.com/rails/rails/tree/master/activerecord
+[Resque]: https://github.com/resque/resque
+[Redis]: https://github.com/redis/redis-rb
+[issue tracker]: https://github.com/hirefire/hirefire/issues
+[home page]: https://www.hirefire.io/
+[docs]: http://support.hirefire.io/help/kb
+[MIT License]: https://github.com/hirefire/hirefire/blob/readme/LICENSE
+[Michael van Rooijen]: http://michael.vanrooijen.io
