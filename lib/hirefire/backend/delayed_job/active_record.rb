@@ -12,8 +12,7 @@ module HireFire
         # @return [Fixnum] the amount of pending jobs
         def jobs
           ::Delayed::Job.
-          where(:failed_at => nil).
-          where('run_at <= ?', Time.now).count
+          where(:failed_at => nil).count
         end
 
         ##
