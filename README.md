@@ -189,6 +189,6 @@ Released under the [MIT License] by [Michael van Rooijen] of [HireFire].
 [Redis]: https://github.com/redis/redis-rb
 [issue tracker]: https://github.com/hirefire/hirefire/issues
 [home page]: https://www.hirefire.io/
-[docs]: http://support.hirefire.io/help/kb
+[docs]: https://help.hirefire.io/
 [MIT License]: https://github.com/hirefire/hirefire/blob/readme/LICENSE
 [Michael van Rooijen]: http://michael.vanrooijen.io
